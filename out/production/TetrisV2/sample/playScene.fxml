@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<?import javafx.scene.control.Button?>
+<BorderPane fx:id="gameBorderPane" prefHeight="500.0" prefWidth="300.0" style="-fx-background-color: GRAY"
+            xmlns:fx="http://javafx.com/fxml" fx:controller="sample.PlayScene">
+    <Button fx:id="moveBlockButton" onKeyPressed="#handleKeyPress"/>
+    <right>
+        <AnchorPane>
+            <Label fx:id="nextBlockLabel" prefHeight="20.0" text="Next Block" layoutY="200"/>
+            <AnchorPane fx:id="nextBlockPane" prefHeight="120" prefWidth="120" layoutY="220"/>
+            <Label fx:id="scoreTextLabel" prefHeight="20.0" prefWidth="120.0" text="Score:" layoutY="340"/>
+            <Label fx:id="scoreLabel" prefHeight="20.0" prefWidth="120.0" text="00000000" layoutY="360"/>
+            <Label fx:id="timeLabelText" prefHeight="20.0" prefWidth="120.0" text="Time:" layoutY="380"/>
+            <Label fx:id="timeLabel" prefHeight="20" prefWidth="120" text="00:00" layoutY="400" />
+        </AnchorPane>
+    </right>
+    <center>
+        <AnchorPane fx:id="centerPane" prefWidth="300" prefHeight="600"/>
+    </center>
+</BorderPane>

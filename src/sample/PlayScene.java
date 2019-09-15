@@ -109,7 +109,7 @@ public class PlayScene implements Initializable {
                 new Block(1, Direction.RIGHT, Direction.DOWN),
                 new Block(1, Direction.LEFT)));
         //S shape
-        original.add(new Tetromino(LIGHTBLUE,
+        original.add(new Tetromino(INDIGO,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.DOWN),
                 new Block(1, Direction.LEFT, Direction.DOWN),
@@ -314,21 +314,20 @@ public class PlayScene implements Initializable {
     }
 
     private int getRandomTetromino(){
-        int randomNumber = 1;
         if(lastTetromino == -1){
-            randomNumber = random.nextInt(original.size());
+            lastTetromino = random.nextInt(original.size());
         } else if(lastTetromino == 0){
-            randomNumber = random.nextInt(original.size()-1)+1;
+            lastTetromino = random.nextInt(original.size()-1)+1;
         } else if(lastTetromino == original.size()-1){
-            randomNumber = random.nextInt(original.size()-1);
+            lastTetromino = random.nextInt(original.size()-1);
         } else{
             if(random.nextBoolean()){
-                randomNumber = random.nextInt(randomNumber);
+                lastTetromino = random.nextInt(lastTetromino);
             } else{
-                randomNumber = random.nextInt(original.size()-randomNumber)+randomNumber;
+                lastTetromino = random.nextInt(original.size()-lastTetromino)+lastTetromino;
             }
         }
-        return randomNumber;
+        return lastTetromino;
     }
 
     private void startGame(){

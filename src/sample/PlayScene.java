@@ -9,7 +9,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
@@ -22,8 +21,6 @@ import static javafx.scene.paint.Color.*;
 
 public class PlayScene implements Initializable {
 
-    @FXML
-    private BorderPane gameBorderPane;
     @FXML
     private AnchorPane centerPane;
     @FXML
@@ -39,15 +36,16 @@ public class PlayScene implements Initializable {
     @FXML
     private Label timeLabel;
     @FXML
+    private Label comboLabelText;
+    @FXML
+    private Label comboLabel;
+    @FXML
     private Button movementButton;
 
     static final int SIZE = 30;
     private static final int BOARD_WIDTH = 10;
     private static final int BOARD_HEIGHT = 20;
 
-    private double milliseconds = 0;
-    private double time = 0;
-    private double maxTime = 0.3;
     private GraphicsContext gc;
     private GraphicsContext gcNextBlock;
     private int[][] board = new int[BOARD_WIDTH][BOARD_HEIGHT];
@@ -55,21 +53,14 @@ public class PlayScene implements Initializable {
     private List<Tetromino> tetrominos = new ArrayList<>();
     private Tetromino nextTetromino;
     private Tetromino selected;
-    private int score = 0;
-    private int level = 1;
 
-    /*@FXML private void handleKeyPressed(@NotNull KeyEvent event){
-        if(event.getCode() == KeyCode.UP){
-            makeMove(Tetromino::rotate, Tetromino::rotateBack, false);
-        } else if(event.getCode() == KeyCode.LEFT){
-            makeMove(block -> block.move(Direction.LEFT), block -> block.move(Direction.RIGHT), false);
-        } else if(event.getCode() == KeyCode.RIGHT) {
-            makeMove(block -> block.move(Direction.RIGHT), block -> block.move(Direction.LEFT), false);
-        } else if(event.getCode() == KeyCode.DOWN){
-            makeMove(block -> block.move(Direction.DOWN), block -> block.move(Direction.UP), true);
-        }
-        render();
-    }*/
+    private double milliseconds = 0;
+    private double time = 0;
+    private double maxTime = 0.3;
+    private int score = 0;
+    private double combo = 1;
+    private int lastTetromino = -1;
+    private Random random = new Random();
 
     private void createContent() {
         score = 0;
@@ -118,7 +109,7 @@ public class PlayScene implements Initializable {
                 new Block(1, Direction.RIGHT, Direction.DOWN),
                 new Block(1, Direction.LEFT)));
         //S shape
-        original.add(new Tetromino(PINK,
+        original.add(new Tetromino(LIGHTBLUE,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.DOWN),
                 new Block(1, Direction.LEFT, Direction.DOWN),
@@ -225,21 +216,50 @@ public class PlayScene implements Initializable {
             }
             rows.add(y);
         }
+        int level = 1;
         switch (rows.size()) {
             case 1:
-                score += 100*level;
+                score += 100* level;
+                if(combo > 1){
+                    comboLabelText.setVisible(false);
+                    comboLabel.setVisible(false);
+                    combo = 1;
+                }
                 break;
             case 2:
-                score += 300*level;
+                score += 300* level;
+                if(combo > 1){
+                    comboLabelText.setVisible(false);
+                    comboLabel.setVisible(false);
+                    combo = 1;
+                }
                 break;
             case 3:
-                score += 500*level;
+                score += 500* level;
+                if(combo > 1){
+                    comboLabelText.setVisible(false);
+                    comboLabel.setVisible(false);
+                    combo = 1;
+                }
                 break;
             case 4:
-                score += 800*level;
+                score += 800* level;
+                if (combo < 2) {
+                    combo += 0.1;
+                } else {
+                    combo = 2;
+                }
                 break;
             default:
                 break;
+        }
+        if(combo > 1){
+            score += 50*combo;
+            if(combo >= 1.5){
+                comboLabelText.setVisible(true);
+                comboLabel.setText(Double.toString(combo));
+                comboLabel.setVisible(true);
+            }
         }
         scoreLabel.setText(Integer.toString(score));
         return rows;
@@ -263,19 +283,19 @@ public class PlayScene implements Initializable {
 
     private void spawn() {
         if (nextTetromino == null) {
-            Tetromino tetromino = original.get(new Random().nextInt(original.size())).copy();
+            Tetromino tetromino = original.get(getRandomTetromino()).copy();
             tetromino.move(BOARD_WIDTH / 2 - 1, 0);
             selected = tetromino;
             tetrominos.add(tetromino);
             tetromino.blocks.forEach(this::placeBlock);
-            tetromino = original.get(new Random().nextInt(original.size())).copy();
+            tetromino = original.get(getRandomTetromino()).copy();
             tetromino.move(BOARD_WIDTH / 2 - 1, 0);
             nextTetromino = tetromino;
         } else {
             selected = nextTetromino;
             tetrominos.add(nextTetromino);
             nextTetromino.blocks.forEach(this::placeBlock);
-            nextTetromino = original.get(new Random().nextInt(original.size())).copy();
+            nextTetromino = original.get(getRandomTetromino()).copy();
             nextTetromino.move(BOARD_WIDTH / 2 - 1, 0);
         }
         Tetromino nextTetrominoCopy = nextTetromino.copy();
@@ -286,8 +306,29 @@ public class PlayScene implements Initializable {
         nextTetrominoCopy.setColor(gcNextBlock);
         if (isInvalidState()) {
             System.out.println("Game Over");
+            for(int i = 0; i < 100; i++){
+                System.out.println(getRandomTetromino());
+            }
             Platform.exit();
         }
+    }
+
+    private int getRandomTetromino(){
+        int randomNumber = 1;
+        if(lastTetromino == -1){
+            randomNumber = random.nextInt(original.size());
+        } else if(lastTetromino == 0){
+            randomNumber = random.nextInt(original.size()-1)+1;
+        } else if(lastTetromino == original.size()-1){
+            randomNumber = random.nextInt(original.size()-1);
+        } else{
+            if(random.nextBoolean()){
+                randomNumber = random.nextInt(randomNumber);
+            } else{
+                randomNumber = random.nextInt(original.size()-randomNumber)+randomNumber;
+            }
+        }
+        return randomNumber;
     }
 
     private void startGame(){
@@ -296,6 +337,10 @@ public class PlayScene implements Initializable {
         scoreLabel.setFont(new Font("Times New Roman", 20));
         timeLabelText.setFont(new Font("Times New Roman", 20));
         timeLabel.setFont(new Font("Times New Roman", 20));
+        comboLabelText.setFont(new Font("Times New Roman", 20));
+        comboLabel.setFont(new Font("Times New Roman", 20));
+        comboLabelText.setVisible(false);
+        comboLabel.setVisible(false);
         loadBoards();
         createContent();
     }

@@ -16,6 +16,10 @@ class Tetromino {
     private Color color;
     List<Block> blocks;
 
+    public Color getColor() {
+        return color;
+    }
+
     Tetromino(Color color, Block... blocks) {
         this.color = color;
         this.blocks = new ArrayList<>(Arrays.asList(blocks));
@@ -46,6 +50,8 @@ class Tetromino {
     }
 
     void rotate() {
+        /*TODO
+         * this rotate is ok for now but it may behave really weird*/
         blocks.forEach(block -> block.setDirection(block.getDirections().stream().map(Direction::next).collect(Collectors.toList()).toArray(new Direction[0])));
     }
 

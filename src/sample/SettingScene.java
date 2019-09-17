@@ -38,8 +38,8 @@ public class SettingScene implements Initializable {
     }
 
     //TODO
-    //error with stopping music when stopped it plays for few more seconds
-    //when leaving settings music stops after about 5 sec
+    // error with stopping music when stopped it plays for few more seconds
+    // when leaving settings music stops after about 5 sec
     private MediaPlayer mediaPlayer;
 
     @FXML

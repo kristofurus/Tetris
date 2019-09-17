@@ -3,10 +3,14 @@ package sample;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
@@ -60,6 +64,7 @@ public class PlayScene implements Initializable {
     private int score = 0;
     private double combo = 1;
     private int lastTetromino = -1;
+    private boolean isPaused = false;
     private Random random = new Random();
 
     private void createContent() {
@@ -72,6 +77,9 @@ public class PlayScene implements Initializable {
         Canvas nextBlockCanvas = new Canvas(4 * SIZE, 4 * SIZE);
         gcNextBlock = nextBlockCanvas.getGraphicsContext2D();
         nextBlockPane.getChildren().addAll(nextBlockCanvas);
+        /*TODO
+         * Go to https://tetris.wiki/Orientation and rebuild tetrominos
+         * it should also correct soe bugs with rotation*/
         //L shape
         original.add(new Tetromino(BLUE,
                 new Block(0, Direction.DOWN),
@@ -79,17 +87,17 @@ public class PlayScene implements Initializable {
                 new Block(2, Direction.RIGHT),
                 new Block(1, Direction.DOWN)));
         //O shape
-        original.add(new Tetromino(GREEN,
+        original.add(new Tetromino(YELLOW,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.RIGHT),
                 new Block(1, Direction.RIGHT, Direction.DOWN),
                 new Block(1, Direction.DOWN)));
         //I shape
-        original.add(new Tetromino(YELLOW,
+        original.add(new Tetromino(INDIGO,
                 new Block(0, Direction.DOWN),
-                new Block(1, Direction.DOWN),
-                new Block(2, Direction.DOWN),
-                new Block(3, Direction.DOWN)));
+                new Block(1, Direction.LEFT),
+                new Block(1, Direction.RIGHT),
+                new Block(2, Direction.RIGHT)));
         //J shape
         original.add(new Tetromino(VIOLET,
                 new Block(0, Direction.DOWN),
@@ -100,8 +108,8 @@ public class PlayScene implements Initializable {
         original.add(new Tetromino(ORANGE,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.RIGHT),
-                new Block(1, Direction.RIGHT, Direction.DOWN),
-                new Block(2, Direction.RIGHT)));
+                new Block(1, Direction.LEFT),
+                new Block(1, Direction.DOWN)));
         //Z shape
         original.add(new Tetromino(RED,
                 new Block(0, Direction.DOWN),
@@ -109,8 +117,8 @@ public class PlayScene implements Initializable {
                 new Block(1, Direction.RIGHT, Direction.DOWN),
                 new Block(1, Direction.LEFT)));
         //S shape
-        original.add(new Tetromino(INDIGO,
-                new Block(0, Direction.DOWN),
+        original.add(new Tetromino(GREEN,
+                new Block(0, Direction.UP),
                 new Block(1, Direction.DOWN),
                 new Block(1, Direction.LEFT, Direction.DOWN),
                 new Block(1, Direction.RIGHT)));
@@ -118,18 +126,20 @@ public class PlayScene implements Initializable {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long l) {
-                try {
-                    Thread.sleep(10);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if(!isPaused) {
+                    try {
+                        Thread.sleep(10);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    time += 0.01;
+                    if (time >= maxTime) {
+                        update();
+                        time = 0;
+                        milliseconds += maxTime * 1000;
+                    }
+                    render();
                 }
-                time += 0.01;
-                if(time >= maxTime) {
-                    update();
-                    time = 0;
-                    milliseconds += maxTime*1000;
-                }
-                render();
             }
         };
         timer.start();
@@ -216,6 +226,8 @@ public class PlayScene implements Initializable {
             }
             rows.add(y);
         }
+        /*TODO
+         * add perfect clear bonus for clearing whole board?*/
         int level = 1;
         switch (rows.size()) {
             case 1:
@@ -298,18 +310,61 @@ public class PlayScene implements Initializable {
             nextTetromino = original.get(getRandomTetromino()).copy();
             nextTetromino.move(BOARD_WIDTH / 2 - 1, 0);
         }
-        Tetromino nextTetrominoCopy = nextTetromino.copy();
+        setNextBlockPane();
+        if (isInvalidState()) {
+            gameOver();
+        }
+    }
+
+    private void gameOver(){
+        /*TODO
+         * make end gameOver menu with showing final score and time
+         * also make it possible to choose if user want to return or play again */
+        System.out.println("Game Over");
+        //change to open new window this one is just so there is pause
+        Platform.exit();
+        isPaused = true;
+        Dialog<ButtonType> endGameDialog = new Dialog<>();
+        endGameDialog.initOwner(centerPane.getScene().getWindow());
+        try{
+            Parent root = FXMLLoader.load(getClass().getResource("endGameDialog.fxml"));
+            endGameDialog.getDialogPane().setContent(root);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        Optional<ButtonType> result = endGameDialog.showAndWait();
+        if(result.isPresent()){
+            Platform.exit();
+        }
+    }
+
+    private void setNextBlockPane(){
         /*TODO
          * make showing next block to look better */
+        Tetromino nextTetrominoCopy = nextTetromino.copy();
         gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
-        nextTetrominoCopy.move(1, 0);
         nextTetrominoCopy.setColor(gcNextBlock);
-        if (isInvalidState()) {
-            System.out.println("Game Over");
-            for(int i = 0; i < 100; i++){
-                System.out.println(getRandomTetromino());
-            }
-            Platform.exit();
+        if (original.get(0).getColor().equals(nextTetromino.getColor())) {
+            //L shape original[0]
+            nextTetrominoCopy.move(1, 1);
+        } else if(original.get(1).getColor().equals(nextTetromino.getColor())){
+            //O shape original[1]
+            nextTetrominoCopy.move(2, 2);
+        } else if(original.get(2).getColor().equals(nextTetromino.getColor())){
+            //I shape original[2]
+            nextTetrominoCopy.move(2, 0);
+        } else if(original.get(3).getColor().equals(nextTetromino.getColor())){
+            //J shape original[3]
+            nextTetrominoCopy.move(1, 0);
+        } else if(original.get(4).getColor().equals(nextTetromino.getColor())){
+            //T shape original[4]
+            nextTetrominoCopy.move(3, 1);
+        } else if(original.get(5).getColor().equals(nextTetromino.getColor())){
+            //Z shape original[5]
+            nextTetrominoCopy.move(2, 2);
+        } else if(original.get(6).getColor().equals(nextTetromino.getColor())){
+            //S shape original[6]
+            nextTetrominoCopy.move(3, 2);
         }
     }
 
@@ -331,6 +386,12 @@ public class PlayScene implements Initializable {
     }
 
     private void startGame(){
+        setLabels();
+        loadBoards();
+        createContent();
+    }
+
+    private void setLabels(){
         nextBlockLabel.setFont(new Font("Times New Roman", 20));
         scoreTextLabel.setFont(new Font("Times New Roman", 20));
         scoreLabel.setFont(new Font("Times New Roman", 20));
@@ -340,8 +401,6 @@ public class PlayScene implements Initializable {
         comboLabel.setFont(new Font("Times New Roman", 20));
         comboLabelText.setVisible(false);
         comboLabel.setVisible(false);
-        loadBoards();
-        createContent();
     }
 
     private void loadBoards(){
@@ -372,7 +431,6 @@ public class PlayScene implements Initializable {
 
     public void handleKeyPressed(){
         movementButton.setOnKeyPressed(e -> {
-            System.out.println(e.getCode());
             switch (e.getCode()) {
                 case UP:
                 case W:
@@ -390,13 +448,45 @@ public class PlayScene implements Initializable {
                 case S:
                     makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
                     break;
-                case ESCAPE:
+                case SPACE:
                     /*TODO
-                     * add pause */
+                     * make tetromino to move on the bottom when pressed space
+                     * and add one more point to score*/
+                    /*while(isInvalidState()){
+                        makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
+                    }
+                    score++;*/
+                    break;
+                case ESCAPE:
+                    isPaused = true;
+                    pauseMenu();
                     break;
             }
             render();
         });
     }
 
+    @FXML
+    private void pauseMenu() {
+        /*TODO
+         * add pause where user can choose:
+         * go back to menu
+         * exit
+         * go to settings?
+         * go back to the game
+         * go to help?*/
+        //change to open new window this one is just so there is pause
+        Dialog<ButtonType> pauseDialog = new Dialog<>();
+        pauseDialog.initOwner(centerPane.getScene().getWindow());
+        try{
+            Parent root = FXMLLoader.load(getClass().getResource("pauseDialog.fxml"));
+            pauseDialog.getDialogPane().setContent(root);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        Optional<ButtonType> result = pauseDialog.showAndWait();
+        if(result.isPresent()){
+            isPaused = false;
+        }
+    }
 }

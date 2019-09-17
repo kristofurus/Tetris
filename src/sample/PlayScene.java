@@ -2,10 +2,13 @@ package sample;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -15,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.stage.Stage;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -68,7 +72,6 @@ public class PlayScene implements Initializable {
     private Random random = new Random();
 
     private void createContent() {
-        score = 0;
         scoreLabel.setText(Integer.toString(score));
         centerPane.setPrefSize(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
         Canvas canvas = new Canvas(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
@@ -319,22 +322,40 @@ public class PlayScene implements Initializable {
     private void gameOver(){
         /*TODO
          * make end gameOver menu with showing final score and time
-         * also make it possible to choose if user want to return or play again */
-        System.out.println("Game Over");
-        //change to open new window this one is just so there is pause
-        Platform.exit();
+         * also make it possible to choose if user want to return(WIP) or play again(Done)
+         * gameOverDialog does not appear after losing unless player presses s/down*/
         isPaused = true;
-        Dialog<ButtonType> endGameDialog = new Dialog<>();
-        endGameDialog.initOwner(centerPane.getScene().getWindow());
-        try{
-            Parent root = FXMLLoader.load(getClass().getResource("endGameDialog.fxml"));
-            endGameDialog.getDialogPane().setContent(root);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        Optional<ButtonType> result = endGameDialog.showAndWait();
-        if(result.isPresent()){
-            Platform.exit();
+        Dialog<ButtonType> gameOverDialog = new Dialog<>();
+        gameOverDialog.setTitle("GameOver");
+        gameOverDialog.setHeaderText("GAME OVER");
+        Date d = new Date((long) milliseconds);
+        SimpleDateFormat df = new SimpleDateFormat("mm:ss");
+        ButtonType buttonTypePlayAgain = new ButtonType("PlayAgain");
+        ButtonType buttonTypeExit = new ButtonType("Exit");
+
+        gameOverDialog.setHeaderText("GAME OVER\n"+ "score: " + score + "\ntime: " + df.format(d));
+
+        gameOverDialog.getDialogPane().getButtonTypes().setAll(buttonTypePlayAgain, buttonTypeExit);
+
+        Optional<ButtonType> result = gameOverDialog.showAndWait();
+        if(result.isPresent()) {
+            if (result.get().equals(buttonTypePlayAgain)) {
+                //mostly done
+                startGame();
+                isPaused = false;
+            } else if (result.get().equals(buttonTypeExit)) {
+                Platform.exit();
+                /*try {
+                    Parent mainMenuParent = FXMLLoader.load(getClass().getResource("sample.fxml"));
+                    Scene mainMenuScene = new Scene(mainMenuParent);
+                    ActionEvent event = new ActionEvent();
+                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    appStage.setScene(mainMenuScene);
+                    appStage.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }*/
+            }
         }
     }
 
@@ -387,8 +408,29 @@ public class PlayScene implements Initializable {
 
     private void startGame(){
         setLabels();
+        setVariables();
         loadBoards();
         createContent();
+    }
+
+    private void setVariables() {
+        milliseconds = 0;
+        time = 0;
+        /*TODO
+         * score sometimes shows 1 not 0
+         * at the beginning */
+        score = 0;
+        combo = 1;
+        lastTetromino = -1;
+        for(int x = 0; x < BOARD_WIDTH; x++) {
+            for (int y = 0; y < BOARD_HEIGHT; y++) {
+                board[x][y] = 0;
+            }
+        }
+        tetrominos.clear();
+        original.clear();
+        nextTetromino = null;
+        selected = null;
     }
 
     private void setLabels(){
@@ -471,22 +513,45 @@ public class PlayScene implements Initializable {
         /*TODO
          * add pause where user can choose:
          * go back to menu
-         * exit
          * go to settings?
-         * go back to the game
+         * go back to the game - at least this one is working
          * go to help?*/
-        //change to open new window this one is just so there is pause
+        isPaused = true;
         Dialog<ButtonType> pauseDialog = new Dialog<>();
-        pauseDialog.initOwner(centerPane.getScene().getWindow());
-        try{
-            Parent root = FXMLLoader.load(getClass().getResource("pauseDialog.fxml"));
-            pauseDialog.getDialogPane().setContent(root);
-        } catch (Exception e){
-            e.printStackTrace();
-        }
+        pauseDialog.setTitle("Pause");
+        pauseDialog.setHeaderText("GAME PAUSED");
+        ButtonType buttonTypeReturn = new ButtonType("Return");
+        ButtonType buttonTypeHelp = new ButtonType("Help");
+        ButtonType buttonTypeExit = new ButtonType("Exit");
+
+        pauseDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn, buttonTypeHelp, buttonTypeExit);
         Optional<ButtonType> result = pauseDialog.showAndWait();
-        if(result.isPresent()){
-            isPaused = false;
+        if(result.isPresent()) {
+            if (result.get().equals(buttonTypeReturn)) {
+                isPaused = false;
+            } else if (result.get().equals(buttonTypeHelp)) {
+                try {
+                    Parent helpParent = FXMLLoader.load(getClass().getResource("helpScene.fxml"));
+                    Scene helpScene = new Scene(helpParent);
+                    ActionEvent event = new ActionEvent();
+                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    appStage.setScene(helpScene);
+                    appStage.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else if (result.get().equals(buttonTypeExit)) {
+                try {
+                    Parent mainMenuParent = FXMLLoader.load(getClass().getResource("sample.fxml"));
+                    Scene mainMenuScene = new Scene(mainMenuParent);
+                    ActionEvent event = new ActionEvent();
+                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    appStage.setScene(mainMenuScene);
+                    appStage.show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

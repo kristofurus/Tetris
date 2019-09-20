@@ -12,11 +12,11 @@ import static sample.PlayScene.SIZE;
 
 class Tetromino {
 
-    int x, y;
+    double x, y;
     private Color color;
     List<Block> blocks;
 
-    public Color getColor() {
+    Color getColor() {
         return color;
     }
 
@@ -42,6 +42,15 @@ class Tetromino {
         });
     }
 
+    void move(double dx, double dy) {
+        x += dx;
+        y += dy;
+        blocks.forEach(block -> {
+            block.x += dx;
+            block.y += dy;
+        });
+    }
+
     void setColor(GraphicsContext gc) {
         gc.setFill(color);
         gc.setStroke(Color.BLACK);
@@ -50,8 +59,6 @@ class Tetromino {
     }
 
     void rotate() {
-        /*TODO
-         * this rotate is ok for now but it may behave really weird*/
         blocks.forEach(block -> block.setDirection(block.getDirections().stream().map(Direction::next).collect(Collectors.toList()).toArray(new Direction[0])));
     }
 

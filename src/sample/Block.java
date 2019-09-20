@@ -7,7 +7,7 @@ public class Block {
     private int distance;
     private List<Direction> directions;
     private Tetromino parent;
-    int x, y;
+    double x, y;
 
     public Block(int distance, Direction... direction) {
         this.distance = distance;

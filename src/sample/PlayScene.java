@@ -80,9 +80,13 @@ public class PlayScene implements Initializable {
         Canvas nextBlockCanvas = new Canvas(4 * SIZE, 4 * SIZE);
         gcNextBlock = nextBlockCanvas.getGraphicsContext2D();
         nextBlockPane.getChildren().addAll(nextBlockCanvas);
+        gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
         /*TODO
          * Go to https://tetris.wiki/Orientation and rebuild tetrominos
          * it should also correct soe bugs with rotation*/
+        /*TODO
+         *  change colours/allow user to do this
+         * because gupi grubas is crying about purple...*/
         //L shape
         original.add(new Tetromino(BLUE,
                 new Block(0, Direction.DOWN),
@@ -185,11 +189,11 @@ public class PlayScene implements Initializable {
     }
 
     private void removeBlock(Block block) {
-        board[block.x][block.y]--;
+        board[(int)block.x][(int)block.y]--;
     }
 
     private void placeBlock(Block block) {
-        board[block.x][block.y]++;
+        board[(int)block.x][(int)block.y]++;
     }
 
     private boolean isOffScreen(Block block) {
@@ -341,52 +345,54 @@ public class PlayScene implements Initializable {
         if(result.isPresent()) {
             if (result.get().equals(buttonTypePlayAgain)) {
                 //mostly done
+                gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
                 startGame();
                 isPaused = false;
             } else if (result.get().equals(buttonTypeExit)) {
                 Platform.exit();
-                /*try {
+                try {
                     Parent mainMenuParent = FXMLLoader.load(getClass().getResource("sample.fxml"));
                     Scene mainMenuScene = new Scene(mainMenuParent);
-                    ActionEvent event = new ActionEvent();
-                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    appStage.setScene(mainMenuScene);
-                    appStage.show();
+                    //ActionEvent event = new ActionEvent();
+                    //Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    //appStage.setScene(mainMenuScene);
+                    //appStage.show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                }*/
+                }
             }
         }
     }
 
     private void setNextBlockPane(){
-        /*TODO
-         * make showing next block to look better */
         Tetromino nextTetrominoCopy = nextTetromino.copy();
         gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
-        nextTetrominoCopy.setColor(gcNextBlock);
         if (original.get(0).getColor().equals(nextTetromino.getColor())) {
             //L shape original[0]
-            nextTetrominoCopy.move(1, 1);
+            nextTetrominoCopy.move(0.5, 1);
         } else if(original.get(1).getColor().equals(nextTetromino.getColor())){
             //O shape original[1]
-            nextTetrominoCopy.move(2, 2);
+            //OK
+            nextTetrominoCopy.move(1, 1);
         } else if(original.get(2).getColor().equals(nextTetromino.getColor())){
             //I shape original[2]
-            nextTetrominoCopy.move(2, 0);
+            //OK
+            nextTetrominoCopy.move(1d, 1.5d);
         } else if(original.get(3).getColor().equals(nextTetromino.getColor())){
             //J shape original[3]
-            nextTetrominoCopy.move(1, 0);
+            nextTetrominoCopy.move(2.5, 1);
         } else if(original.get(4).getColor().equals(nextTetromino.getColor())){
             //T shape original[4]
-            nextTetrominoCopy.move(3, 1);
+            //OK
+            nextTetrominoCopy.move(1.5, 1);
         } else if(original.get(5).getColor().equals(nextTetromino.getColor())){
             //Z shape original[5]
-            nextTetrominoCopy.move(2, 2);
+            nextTetrominoCopy.move(1.5, 1);
         } else if(original.get(6).getColor().equals(nextTetromino.getColor())){
             //S shape original[6]
-            nextTetrominoCopy.move(3, 2);
+            nextTetrominoCopy.move(1.5, 1);
         }
+        nextTetrominoCopy.setColor(gcNextBlock);
     }
 
     private int getRandomTetromino(){
@@ -418,7 +424,8 @@ public class PlayScene implements Initializable {
         time = 0;
         /*TODO
          * score sometimes shows 1 not 0
-         * at the beginning */
+         * at the beginning
+         * it actually do this every time*/
         score = 0;
         combo = 1;
         lastTetromino = -1;
@@ -455,15 +462,6 @@ public class PlayScene implements Initializable {
                 centerPane.getChildren().add(rectangles[i][j]);
             }
         }
-        Rectangle[][] nextTetromino = new Rectangle[4][4];
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                nextTetromino[i][j] = new Rectangle(SIZE * i, SIZE * j, SIZE, SIZE);
-                nextTetromino[i][j].setFill(LIGHTGRAY);
-                nextTetromino[i][j].setStroke(BLACK);
-                nextBlockPane.getChildren().add(nextTetromino[i][j]);
-            }
-        }
     }
 
     @Override
@@ -494,10 +492,12 @@ public class PlayScene implements Initializable {
                     /*TODO
                      * make tetromino to move on the bottom when pressed space
                      * and add one more point to score*/
-                    /*while(isInvalidState()){
+                    //this one is not working come up with a better idea
+                    //it makes player to lose after pressing space XD
+                    while(selected != nextTetromino){
                         makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
                     }
-                    score++;*/
+                    score++;
                     break;
                 case ESCAPE:
                     isPaused = true;

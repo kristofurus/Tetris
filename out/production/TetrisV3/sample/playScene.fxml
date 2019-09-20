@@ -5,15 +5,15 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.Button?>
 
-<BorderPane fx:id="gameBorderPane" xmlns:fx="http://javafx.com/fxml" fx:controller="sample.PlayScene"
+<BorderPane  xmlns:fx="http://javafx.com/fxml" fx:controller="sample.PlayScene"
             prefHeight="500.0" prefWidth="300.0" style="-fx-background-color: GRAY">
     <Button fx:id="movementButton" onKeyPressed="#handleKeyPressed"/>
     <right>
         <AnchorPane>
             <Label fx:id="comboLabelText" prefHeight="20.0" text="COMBO" layoutY="160"/>
-            <Label fx:id="comboLabel" prefHeight="20.0" text="" layoutY="180"/>
+            <Label fx:id="comboLabel" prefHeight="20.0" layoutY="180"/>
             <Label fx:id="nextBlockLabel" prefHeight="20.0" text="Next Block" layoutY="200"/>
-            <AnchorPane fx:id="nextBlockPane" prefHeight="120" prefWidth="120" layoutY="220"/>
+            <AnchorPane fx:id="nextBlockPane" prefHeight="120" prefWidth="120" layoutY="220" style="-fx-background-color: GRAY"/>
             <Label fx:id="scoreTextLabel" prefHeight="20.0" prefWidth="120.0" text="Score:" layoutY="340"/>
             <Label fx:id="scoreLabel" prefHeight="20.0" prefWidth="120.0" text="0" layoutY="360"/>
             <Label fx:id="timeLabelText" prefHeight="20.0" prefWidth="120.0" text="Time:" layoutY="380"/>

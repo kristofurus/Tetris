@@ -1,14 +1,14 @@
 package sample;
 
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Consumer;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -18,12 +18,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
-
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Consumer;
 
 import static javafx.scene.paint.Color.*;
 
@@ -69,7 +63,7 @@ public class PlayScene implements Initializable {
     private double combo = 1;
     private int lastTetromino = -1;
     private boolean isPaused = false;
-    private Random random = new Random();
+    private final Random random = new Random();
 
     private void createContent() {
         scoreLabel.setText(Integer.toString(score));
@@ -86,7 +80,7 @@ public class PlayScene implements Initializable {
          * it should also correct soe bugs with rotation*/
         /*TODO
          *  change colours/allow user to do this
-         * because gupi grubas is crying about purple...*/
+         * because somebody is crying about purple...*/
         //L shape
         original.add(new Tetromino(BLUE,
                 new Block(0, Direction.DOWN),
@@ -350,16 +344,16 @@ public class PlayScene implements Initializable {
                 isPaused = false;
             } else if (result.get().equals(buttonTypeExit)) {
                 Platform.exit();
-                try {
+                /*try {
                     Parent mainMenuParent = FXMLLoader.load(getClass().getResource("sample.fxml"));
                     Scene mainMenuScene = new Scene(mainMenuParent);
-                    //ActionEvent event = new ActionEvent();
-                    //Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    //appStage.setScene(mainMenuScene);
-                    //appStage.show();
+                    ActionEvent event = new ActionEvent();
+                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    appStage.setScene(mainMenuScene);
+                    appStage.show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                }*/
             }
         }
     }
@@ -494,10 +488,10 @@ public class PlayScene implements Initializable {
                      * and add one more point to score*/
                     //this one is not working come up with a better idea
                     //it makes player to lose after pressing space XD
-                    while(selected != nextTetromino){
+                    /*while(selected != nextTetromino){
                         makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
                     }
-                    score++;
+                    score++;*/
                     break;
                 case ESCAPE:
                     isPaused = true;
@@ -508,14 +502,13 @@ public class PlayScene implements Initializable {
         });
     }
 
-    @FXML
     private void pauseMenu() {
         /*TODO
          * add pause where user can choose:
-         * go back to menu
-         * go to settings?
-         * go back to the game - at least this one is working
-         * go to help?*/
+         * go back to menu (WIP)
+         * go to settings? (WIP)
+         * go back to the game (DONE)
+         * go to help? (DONE)*/
         isPaused = true;
         Dialog<ButtonType> pauseDialog = new Dialog<>();
         pauseDialog.setTitle("Pause");
@@ -530,18 +523,9 @@ public class PlayScene implements Initializable {
             if (result.get().equals(buttonTypeReturn)) {
                 isPaused = false;
             } else if (result.get().equals(buttonTypeHelp)) {
-                try {
-                    Parent helpParent = FXMLLoader.load(getClass().getResource("helpScene.fxml"));
-                    Scene helpScene = new Scene(helpParent);
-                    ActionEvent event = new ActionEvent();
-                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    appStage.setScene(helpScene);
-                    appStage.show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+               helpMenu();
             } else if (result.get().equals(buttonTypeExit)) {
-                try {
+                /*try {
                     Parent mainMenuParent = FXMLLoader.load(getClass().getResource("sample.fxml"));
                     Scene mainMenuScene = new Scene(mainMenuParent);
                     ActionEvent event = new ActionEvent();
@@ -550,8 +534,23 @@ public class PlayScene implements Initializable {
                     appStage.show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
+                }*/
+                System.out.println("here you exit but for now you come back to the game");
+                isPaused = false;
             }
+        }
+    }
+
+    private void helpMenu(){
+        Dialog<ButtonType> helpDialog = new Dialog<>();
+        helpDialog.setTitle("Help");
+        helpDialog.setHeaderText("w/up - rotate\na/left - move left\n" +
+                "d/right - move right\ns/down - move down");
+        ButtonType buttonTypeReturn = new ButtonType("Return");
+        helpDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn);
+        Optional<ButtonType> helpResult = helpDialog.showAndWait();
+        if (helpResult.isPresent()){
+            pauseMenu();
         }
     }
 }

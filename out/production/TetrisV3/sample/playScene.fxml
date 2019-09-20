@@ -13,7 +13,7 @@
             <Label fx:id="comboLabelText" prefHeight="20.0" text="COMBO" layoutY="160"/>
             <Label fx:id="comboLabel" prefHeight="20.0" layoutY="180"/>
             <Label fx:id="nextBlockLabel" prefHeight="20.0" text="Next Block" layoutY="200"/>
-            <AnchorPane fx:id="nextBlockPane" prefHeight="120" prefWidth="120" layoutY="220" style="-fx-background-color: GRAY"/>
+            <AnchorPane fx:id="nextBlockPane" prefHeight="120" prefWidth="120" layoutY="220"/>
             <Label fx:id="scoreTextLabel" prefHeight="20.0" prefWidth="120.0" text="Score:" layoutY="340"/>
             <Label fx:id="scoreLabel" prefHeight="20.0" prefWidth="120.0" text="0" layoutY="360"/>
             <Label fx:id="timeLabelText" prefHeight="20.0" prefWidth="120.0" text="Time:" layoutY="380"/>

@@ -16,9 +16,12 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
+import static javafx.scene.media.MediaPlayer.INDEFINITE;
 import static javafx.scene.paint.Color.*;
 
 public class PlayScene implements Initializable {
@@ -63,7 +66,9 @@ public class PlayScene implements Initializable {
     private double combo = 1;
     private int lastTetromino = -1;
     private boolean isPaused = false;
+    private boolean isMusic = false;
     private final Random random = new Random();
+    private MediaPlayer mediaPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/Tetris.mp3").toString()));;
 
     private void createContent() {
         scoreLabel.setText(Integer.toString(score));
@@ -515,9 +520,15 @@ public class PlayScene implements Initializable {
         pauseDialog.setHeaderText("GAME PAUSED");
         ButtonType buttonTypeReturn = new ButtonType("Return");
         ButtonType buttonTypeHelp = new ButtonType("Help");
+        ButtonType buttonTypeMusic;
+        if(isMusic) {
+            buttonTypeMusic = new ButtonType("Music on");
+        } else {
+            buttonTypeMusic = new ButtonType("Music off");
+        }
         ButtonType buttonTypeExit = new ButtonType("Exit");
 
-        pauseDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn, buttonTypeHelp, buttonTypeExit);
+        pauseDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn, buttonTypeHelp, buttonTypeMusic, buttonTypeExit);
         Optional<ButtonType> result = pauseDialog.showAndWait();
         if(result.isPresent()) {
             if (result.get().equals(buttonTypeReturn)) {
@@ -537,6 +548,18 @@ public class PlayScene implements Initializable {
                 }*/
                 System.out.println("here you exit but for now you come back to the game");
                 isPaused = false;
+            } else if (result.get().equals(buttonTypeMusic)){
+                isMusic = !isMusic;
+                if (isMusic) {
+                    //mediaPlayer.setOnReady(() -> {
+                        mediaPlayer.setAutoPlay(true);
+                        mediaPlayer.setCycleCount(INDEFINITE);
+                    //});
+                } else {
+                    mediaPlayer.stop();
+                    mediaPlayer.setAutoPlay(false);
+                }
+                pauseMenu();
             }
         }
     }
@@ -553,4 +576,12 @@ public class PlayScene implements Initializable {
             pauseMenu();
         }
     }
+
+    /*private void settingsMenu(){
+        Dialog<ButtonType> settingsDialog = new Dialog<>();
+        settingsDialog.setTitle("Settings");
+        ButtonType buttomTypeMusic = new ButtonType("Music");
+        ButtonType buttonTypeReturn = new ButtonType("Return");
+        settingsDialog.getDialogPane().getButtonTypes().setAll(buttomTypeMusic, buttonTypeReturn);
+    }*/
 }

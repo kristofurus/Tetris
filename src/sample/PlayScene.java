@@ -1,10 +1,5 @@
 package sample;
 
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.function.Consumer;
-
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -21,11 +16,17 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.function.Consumer;
+
 import static javafx.scene.media.MediaPlayer.INDEFINITE;
 import static javafx.scene.paint.Color.*;
 
 public class PlayScene implements Initializable {
 
+    //FXML variables
     @FXML
     private AnchorPane centerPane;
     @FXML
@@ -47,31 +48,44 @@ public class PlayScene implements Initializable {
     @FXML
     private Button movementButton;
 
+    //size variables
     static final int SIZE = 30;
     private static final int BOARD_WIDTH = 10;
     private static final int BOARD_HEIGHT = 20;
 
+    //checking board variables
+    private int[][] board = new int[BOARD_WIDTH][BOARD_HEIGHT];
+
+    //creating tetromino variables
     private GraphicsContext gc;
     private GraphicsContext gcNextBlock;
-    private int[][] board = new int[BOARD_WIDTH][BOARD_HEIGHT];
     private List<Tetromino> original = new ArrayList<>();
     private List<Tetromino> tetrominos = new ArrayList<>();
     private Tetromino nextTetromino;
     private Tetromino selected;
+    private final Random random = new Random();
+    private int lastTetromino = -1;
 
+    //time variables
     private double milliseconds = 0;
     private double time = 0;
     private double maxTime = 0.3;
+
+    //score variables
     private int score = 0;
     private double combo = 1;
-    private int lastTetromino = -1;
-    private boolean isPaused = false;
-    private boolean isMusic = false;
-    private final Random random = new Random();
-    private MediaPlayer mediaPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/Tetris.mp3").toString()));;
 
+    //pause dialog variables
+    private boolean isPaused = false;
+
+    //settings variables
+    private boolean isMusic = false;
+    private MediaPlayer mediaPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/Tetris.mp3").toString()));
+
+    /**method: createContent
+     * prepares board seen from user and shapes that will be generated
+     * it also starts timer that will measure time and update board*/
     private void createContent() {
-        scoreLabel.setText(Integer.toString(score));
         centerPane.setPrefSize(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
         Canvas canvas = new Canvas(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
         gc = canvas.getGraphicsContext2D();
@@ -151,6 +165,8 @@ public class PlayScene implements Initializable {
         timer.start();
     }
 
+    /**method: update
+     * moves block one row down and updates time*/
     private void update() {
         makeMove(block -> block.move(Direction.DOWN), block -> block.move(Direction.UP), true);
         Date d = new Date((long) milliseconds);
@@ -159,6 +175,9 @@ public class PlayScene implements Initializable {
         timeLabel.setText(timeText);
     }
 
+    /**method: makeMove
+     * checks if tetromino can move in given direction
+     * and if check is positives moves it in given direction*/
     private void makeMove(Consumer<Tetromino> onSuccess, Consumer<Tetromino> onFail, boolean endMove) {
         selected.blocks.forEach(this::removeBlock);
         onSuccess.accept(selected);
@@ -169,9 +188,9 @@ public class PlayScene implements Initializable {
             onFail.accept(selected);
             selected.blocks.forEach(this::placeBlock);
             if (endMove) {
-                sweep();
                 score += 1;
                 scoreLabel.setText(Integer.toString(score));
+                sweep();
             }
             return;
         }
@@ -180,26 +199,35 @@ public class PlayScene implements Initializable {
             onFail.accept(selected);
             selected.blocks.forEach(this::placeBlock);
             if (endMove) {
-                sweep();
                 score += 1;
                 scoreLabel.setText(Integer.toString(score));
+                sweep();
             }
         }
     }
 
+    /**method: removeBlock
+     * changes value from 1 to 0 in correct element of matrix board*/
     private void removeBlock(Block block) {
         board[(int)block.x][(int)block.y]--;
     }
 
+    /**method: removeBlock
+     * changes value form 0 to 1 in correct element of matrix board*/
     private void placeBlock(Block block) {
         board[(int)block.x][(int)block.y]++;
     }
 
+    /**method: isOffScreen
+     * checks position od the block and return true if block is off screen
+     * or false if block is inside board*/
     private boolean isOffScreen(Block block) {
         return block.x < 0 || block.x >= BOARD_WIDTH ||
                 block.y < 0 || block.y >= BOARD_HEIGHT;
     }
 
+    /**method: sweep
+     * */
     private void sweep() {
         List<Integer> rows = sweepRows();
         rows.forEach(row -> {
@@ -324,9 +352,8 @@ public class PlayScene implements Initializable {
 
     private void gameOver(){
         /*TODO
-         * make end gameOver menu with showing final score and time
-         * also make it possible to choose if user want to return(WIP) or play again(Done)
-         * gameOverDialog does not appear after losing unless player presses s/down*/
+         * make end gameOver menu with showing final score and time (Done)
+         * also make it possible to choose if user want to return(WIP) or play again(Done)*/
         isPaused = true;
         Dialog<ButtonType> gameOverDialog = new Dialog<>();
         gameOverDialog.setTitle("GameOver");
@@ -335,32 +362,20 @@ public class PlayScene implements Initializable {
         SimpleDateFormat df = new SimpleDateFormat("mm:ss");
         ButtonType buttonTypePlayAgain = new ButtonType("PlayAgain");
         ButtonType buttonTypeExit = new ButtonType("Exit");
-
         gameOverDialog.setHeaderText("GAME OVER\n"+ "score: " + score + "\ntime: " + df.format(d));
-
         gameOverDialog.getDialogPane().getButtonTypes().setAll(buttonTypePlayAgain, buttonTypeExit);
 
-        Optional<ButtonType> result = gameOverDialog.showAndWait();
-        if(result.isPresent()) {
-            if (result.get().equals(buttonTypePlayAgain)) {
-                //mostly done
+        gameOverDialog.setOnCloseRequest(e -> {
+            if (gameOverDialog.getResult().equals(buttonTypePlayAgain)) {
                 gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
                 startGame();
                 isPaused = false;
-            } else if (result.get().equals(buttonTypeExit)) {
+            } else if (gameOverDialog.getResult().equals(buttonTypeExit)) {
                 Platform.exit();
-                /*try {
-                    Parent mainMenuParent = FXMLLoader.load(getClass().getResource("sample.fxml"));
-                    Scene mainMenuScene = new Scene(mainMenuParent);
-                    ActionEvent event = new ActionEvent();
-                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    appStage.setScene(mainMenuScene);
-                    appStage.show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
             }
-        }
+        });
+
+        gameOverDialog.show();
     }
 
     private void setNextBlockPane(){
@@ -412,8 +427,8 @@ public class PlayScene implements Initializable {
     }
 
     private void startGame(){
-        setLabels();
         setVariables();
+        setLabels();
         loadBoards();
         createContent();
     }
@@ -421,10 +436,6 @@ public class PlayScene implements Initializable {
     private void setVariables() {
         milliseconds = 0;
         time = 0;
-        /*TODO
-         * score sometimes shows 1 not 0
-         * at the beginning
-         * it actually do this every time*/
         score = 0;
         combo = 1;
         lastTetromino = -1;
@@ -443,6 +454,7 @@ public class PlayScene implements Initializable {
         nextBlockLabel.setFont(new Font("Times New Roman", 20));
         scoreTextLabel.setFont(new Font("Times New Roman", 20));
         scoreLabel.setFont(new Font("Times New Roman", 20));
+        scoreLabel.setText(Integer.toString(score));
         timeLabelText.setFont(new Font("Times New Roman", 20));
         timeLabel.setFont(new Font("Times New Roman", 20));
         comboLabelText.setFont(new Font("Times New Roman", 20));
@@ -511,9 +523,9 @@ public class PlayScene implements Initializable {
         /*TODO
          * add pause where user can choose:
          * go back to menu (WIP)
-         * go to settings? (WIP)
+         * go to settings (WIP) <- changed into turn on/off music
          * go back to the game (DONE)
-         * go to help? (DONE)*/
+         * go to help (DONE)*/
         isPaused = true;
         Dialog<ButtonType> pauseDialog = new Dialog<>();
         pauseDialog.setTitle("Pause");

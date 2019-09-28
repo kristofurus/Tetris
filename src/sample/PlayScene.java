@@ -79,8 +79,13 @@ public class PlayScene implements Initializable {
     private boolean isPaused = false;
 
     //settings variables
+
+    //music variables
     private boolean isMusic = false;
     private MediaPlayer mediaPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/Tetris.mp3").toString()));
+
+    //sound variables
+    private boolean isSound = false;
 
     /**method: createContent
      * prepares board seen from user and shapes that will be generated
@@ -182,6 +187,7 @@ public class PlayScene implements Initializable {
         selected.blocks.forEach(this::removeBlock);
         onSuccess.accept(selected);
         boolean offscreen = selected.blocks.stream().anyMatch(this::isOffScreen);
+        MediaPlayer fallPlayer;
         if (!offscreen) {
             selected.blocks.forEach(this::placeBlock);
         } else {
@@ -190,6 +196,10 @@ public class PlayScene implements Initializable {
             if (endMove) {
                 score += 1;
                 scoreLabel.setText(Integer.toString(score));
+                if(isSound){
+                    fallPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/fall.wav").toString()));
+                    fallPlayer.play();
+                }
                 sweep();
             }
             return;
@@ -201,6 +211,10 @@ public class PlayScene implements Initializable {
             if (endMove) {
                 score += 1;
                 scoreLabel.setText(Integer.toString(score));
+                if(isSound){
+                    fallPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/fall.wav").toString()));
+                    fallPlayer.play();
+                }
                 sweep();
             }
         }
@@ -263,6 +277,10 @@ public class PlayScene implements Initializable {
         /*TODO
          * add perfect clear bonus for clearing whole board?*/
         int level = 1;
+        if(rows.size() > 0 && isSound){
+            MediaPlayer linePlayer = new MediaPlayer(new Media(getClass().getResource("../resources/line.wav").toString()));
+            linePlayer.play();
+        }
         switch (rows.size()) {
             case 1:
                 score += 100* level;
@@ -538,9 +556,15 @@ public class PlayScene implements Initializable {
         } else {
             buttonTypeMusic = new ButtonType("Music off");
         }
+        ButtonType buttonTypeSound;
+        if(isSound) {
+            buttonTypeSound = new ButtonType("Sound on");
+        } else {
+            buttonTypeSound = new ButtonType("Sound off");
+        }
         ButtonType buttonTypeExit = new ButtonType("Exit");
 
-        pauseDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn, buttonTypeHelp, buttonTypeMusic, buttonTypeExit);
+        pauseDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn, buttonTypeHelp, buttonTypeMusic, buttonTypeSound, buttonTypeExit);
         Optional<ButtonType> result = pauseDialog.showAndWait();
         if(result.isPresent()) {
             if (result.get().equals(buttonTypeReturn)) {
@@ -548,29 +572,20 @@ public class PlayScene implements Initializable {
             } else if (result.get().equals(buttonTypeHelp)) {
                helpMenu();
             } else if (result.get().equals(buttonTypeExit)) {
-                /*try {
-                    Parent mainMenuParent = FXMLLoader.load(getClass().getResource("sample.fxml"));
-                    Scene mainMenuScene = new Scene(mainMenuParent);
-                    ActionEvent event = new ActionEvent();
-                    Stage appStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    appStage.setScene(mainMenuScene);
-                    appStage.show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }*/
                 System.out.println("here you exit but for now you come back to the game");
                 isPaused = false;
             } else if (result.get().equals(buttonTypeMusic)){
                 isMusic = !isMusic;
                 if (isMusic) {
-                    //mediaPlayer.setOnReady(() -> {
                         mediaPlayer.setAutoPlay(true);
                         mediaPlayer.setCycleCount(INDEFINITE);
-                    //});
                 } else {
                     mediaPlayer.stop();
                     mediaPlayer.setAutoPlay(false);
                 }
+                pauseMenu();
+            } else if (result.get().equals(buttonTypeSound)) {
+                isSound = !isSound;
                 pauseMenu();
             }
         }
@@ -588,12 +603,4 @@ public class PlayScene implements Initializable {
             pauseMenu();
         }
     }
-
-    /*private void settingsMenu(){
-        Dialog<ButtonType> settingsDialog = new Dialog<>();
-        settingsDialog.setTitle("Settings");
-        ButtonType buttomTypeMusic = new ButtonType("Music");
-        ButtonType buttonTypeReturn = new ButtonType("Return");
-        settingsDialog.getDialogPane().getButtonTypes().setAll(buttomTypeMusic, buttonTypeReturn);
-    }*/
 }

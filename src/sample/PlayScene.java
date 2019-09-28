@@ -382,15 +382,21 @@ public class PlayScene implements Initializable {
         /*TODO
          * make end gameOver menu with showing final score and time (Done)
          * also make it possible to choose if user want to return(WIP) or play again(Done)*/
+        //pausing game
         isPaused = true;
+        //creating dialog
         Dialog<ButtonType> gameOverDialog = new Dialog<>();
         gameOverDialog.setTitle("GameOver");
         gameOverDialog.setHeaderText("GAME OVER");
+        //preparing time
         Date d = new Date((long) milliseconds);
         SimpleDateFormat df = new SimpleDateFormat("mm:ss");
+        //preparing buttons
         ButtonType buttonTypePlayAgain = new ButtonType("PlayAgain");
         ButtonType buttonTypeExit = new ButtonType("Exit");
+        //text
         gameOverDialog.setHeaderText("GAME OVER\n"+ "score: " + score + "\ntime: " + df.format(d));
+        //setting buttons
         gameOverDialog.getDialogPane().getButtonTypes().setAll(buttonTypePlayAgain, buttonTypeExit);
 
         gameOverDialog.setOnCloseRequest(e -> {
@@ -402,7 +408,7 @@ public class PlayScene implements Initializable {
                 Platform.exit();
             }
         });
-
+        //showing dialog
         gameOverDialog.show();
     }
 
@@ -511,9 +517,7 @@ public class PlayScene implements Initializable {
             switch (e.getCode()) {
                 case UP:
                 case W:
-                    /*TODO
-                     * block possibility of rotating for O-shape block*/
-                    if(selected != original.get(1)) {
+                    if(selected.getColor() != original.get(1).getColor()) {
                         makeMove(Tetromino::rotate, Tetromino::rotateBack, false);
                     }
                     break;
@@ -530,15 +534,11 @@ public class PlayScene implements Initializable {
                     makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
                     break;
                 case SPACE:
-                    /*TODO
-                     * make tetromino to move on the bottom when pressed space
-                     * and add one more point to score*/
-                    //this one is not working come up with a better idea
-                    //it makes player to lose after pressing space XD
-                    /*while(selected != nextTetromino){
+                    //this one is ok but does not allow player to instantly drop a tetromino
+                    while((int)selected.x != BOARD_WIDTH/2 && selected.y != 0){
                         makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
                     }
-                    score++;*/
+                    score++;
                     break;
                 case ESCAPE:
                     isPaused = true;
@@ -553,21 +553,24 @@ public class PlayScene implements Initializable {
         /*TODO
          * add pause where user can choose:
          * go back to menu (WIP)
-         * go to settings (WIP) <- changed into turn on/off music
+         * go to settings (WIP) <- changed into turn on/off music/sound
          * go back to the game (DONE)
          * go to help (DONE)*/
         isPaused = true;
         Dialog<ButtonType> pauseDialog = new Dialog<>();
+        //buttons
         pauseDialog.setTitle("Pause");
         pauseDialog.setHeaderText("GAME PAUSED");
         ButtonType buttonTypeReturn = new ButtonType("Return");
         ButtonType buttonTypeHelp = new ButtonType("Help");
+        //music button
         ButtonType buttonTypeMusic;
         if(isMusic) {
             buttonTypeMusic = new ButtonType("Music on");
         } else {
             buttonTypeMusic = new ButtonType("Music off");
         }
+        //sound button
         ButtonType buttonTypeSound;
         if(isSound) {
             buttonTypeSound = new ButtonType("Sound on");
@@ -577,6 +580,8 @@ public class PlayScene implements Initializable {
         ButtonType buttonTypeExit = new ButtonType("Exit");
 
         pauseDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn, buttonTypeHelp, buttonTypeMusic, buttonTypeSound, buttonTypeExit);
+
+        //preparing results for pressing correct button
         Optional<ButtonType> result = pauseDialog.showAndWait();
         if(result.isPresent()) {
             if (result.get().equals(buttonTypeReturn)) {

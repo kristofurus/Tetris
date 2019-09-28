@@ -69,8 +69,8 @@ public class PlayScene implements Initializable {
     //speed variables
     private static final double MAX_SPEED = 0.3d;
     private static final double MIN_SPEED = 0.15d;
-    private static final int SPEED_UPDATE_MILLISECONDS = 15000;
-    private int millisecondsSinceUpdate = 0;
+    private static final double SPEED_UPDATE_SECONDS = 15;
+    private double secondsSinceUpdate = 0;
     private double speed = MAX_SPEED;
 
     //time variables
@@ -106,17 +106,14 @@ public class PlayScene implements Initializable {
         nextBlockPane.getChildren().addAll(nextBlockCanvas);
         gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
         /*TODO
-         * Go to https://tetris.wiki/Orientation and rebuild tetrominos
-         * it should also correct soe bugs with rotation*/
-        /*TODO
          *  change colours/allow user to do this
          * because somebody is crying about purple...*/
         //L shape
         original.add(new Tetromino(BLUE,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.RIGHT),
-                new Block(2, Direction.RIGHT),
-                new Block(1, Direction.DOWN)));
+                new Block(1, Direction.LEFT),
+                new Block(1, Direction.DOWN, Direction.LEFT)));
         //O shape
         original.add(new Tetromino(YELLOW,
                 new Block(0, Direction.DOWN),
@@ -133,8 +130,8 @@ public class PlayScene implements Initializable {
         original.add(new Tetromino(VIOLET,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.LEFT),
-                new Block(2, Direction.LEFT),
-                new Block(1, Direction.DOWN)));
+                new Block(1, Direction.RIGHT),
+                new Block(1, Direction.DOWN, Direction.RIGHT)));
         //T shape
         original.add(new Tetromino(ORANGE,
                 new Block(0, Direction.DOWN),
@@ -163,17 +160,17 @@ public class PlayScene implements Initializable {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    time += 0.01d;
-                    millisecondsSinceUpdate += 10;
-                    if(millisecondsSinceUpdate >= SPEED_UPDATE_MILLISECONDS){
+                    time += 0.01f;
+                    secondsSinceUpdate += 0.01f;
+                    if(secondsSinceUpdate >= SPEED_UPDATE_SECONDS){
                         if(speed > MIN_SPEED) {
-                            speed -= 0.01d;
-                            millisecondsSinceUpdate = 0;
+                            speed -= 0.01f;
+                            secondsSinceUpdate = 0.00f;
                         }
                     }
                     if (time >= speed) {
                         update();
-                        time = 0.0d;
+                        time = 0.0f;
                         milliseconds += speed * 1000;
                     }
                     render();
@@ -414,21 +411,18 @@ public class PlayScene implements Initializable {
         gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
         if (original.get(0).getColor().equals(nextTetromino.getColor())) {
             //L shape original[0]
-            nextTetrominoCopy.move(0.5, 1);
+            nextTetrominoCopy.move(1.5, 1);
         } else if(original.get(1).getColor().equals(nextTetromino.getColor())){
             //O shape original[1]
-            //OK
             nextTetrominoCopy.move(1, 1);
         } else if(original.get(2).getColor().equals(nextTetromino.getColor())){
             //I shape original[2]
-            //OK
             nextTetrominoCopy.move(1d, 1.5d);
         } else if(original.get(3).getColor().equals(nextTetromino.getColor())){
             //J shape original[3]
-            nextTetrominoCopy.move(2.5, 1);
+            nextTetrominoCopy.move(1.5, 1);
         } else if(original.get(4).getColor().equals(nextTetromino.getColor())){
             //T shape original[4]
-            //OK
             nextTetrominoCopy.move(1.5, 1);
         } else if(original.get(5).getColor().equals(nextTetromino.getColor())){
             //Z shape original[5]
@@ -517,7 +511,11 @@ public class PlayScene implements Initializable {
             switch (e.getCode()) {
                 case UP:
                 case W:
-                    makeMove(Tetromino::rotate, Tetromino::rotateBack, false);
+                    /*TODO
+                     * block possibility of rotating for O-shape block*/
+                    if(selected != original.get(1)) {
+                        makeMove(Tetromino::rotate, Tetromino::rotateBack, false);
+                    }
                     break;
                 case LEFT:
                 case A:

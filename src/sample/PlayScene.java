@@ -66,10 +66,16 @@ public class PlayScene implements Initializable {
     private final Random random = new Random();
     private int lastTetromino = -1;
 
+    //speed variables
+    private static final double MAX_SPEED = 0.3d;
+    private static final double MIN_SPEED = 0.15d;
+    private static final int SPEED_UPDATE_MILLISECONDS = 15000;
+    private int millisecondsSinceUpdate = 0;
+    private double speed = MAX_SPEED;
+
     //time variables
     private double milliseconds = 0;
     private double time = 0;
-    private double maxTime = 0.3;
 
     //score variables
     private int score = 0;
@@ -157,11 +163,18 @@ public class PlayScene implements Initializable {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    time += 0.01;
-                    if (time >= maxTime) {
+                    time += 0.01d;
+                    millisecondsSinceUpdate += 10;
+                    if(millisecondsSinceUpdate >= SPEED_UPDATE_MILLISECONDS){
+                        if(speed > MIN_SPEED) {
+                            speed -= 0.01d;
+                            millisecondsSinceUpdate = 0;
+                        }
+                    }
+                    if (time >= speed) {
                         update();
-                        time = 0;
-                        milliseconds += maxTime * 1000;
+                        time = 0.0d;
+                        milliseconds += speed * 1000;
                     }
                     render();
                 }
@@ -456,6 +469,7 @@ public class PlayScene implements Initializable {
         time = 0;
         score = 0;
         combo = 1;
+        speed = MAX_SPEED;
         lastTetromino = -1;
         for(int x = 0; x < BOARD_WIDTH; x++) {
             for (int y = 0; y < BOARD_HEIGHT; y++) {

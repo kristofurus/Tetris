@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="TetrisV3:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/TetrisV3_jar</output-path>
-    <root id="archive" name="TetrisV3.jar">
-      <element id="module-output" name="TetrisV3" />
-      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/jetbrains/annotations/17.0.0/annotations-17.0.0.jar" path-in-jar="/" />
-    </root>
-  </artifact>
-</component>

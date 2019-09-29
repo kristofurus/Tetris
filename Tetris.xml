@@ -2,7 +2,7 @@
 <project name="tetrisv3" default="all">
   
   
-  <property file="tetrisv3.properties"/>
+  <property file="Tetris.properties"/>
   <!-- Uncomment the following property if no tests compilation is needed -->
   <!-- 
   <property name="skip.tests" value="true"/>
@@ -157,11 +157,8 @@
   <target name="init.artifacts">
     <property name="artifacts.temp.dir" value="${basedir}/__artifacts_temp"/>
     <property name="artifact.output.tetris" value="${basedir}/out/artifacts/Tetris"/>
-    <property name="artifact.output.tetrisv3:jar" value="${basedir}/out/artifacts/TetrisV3_jar"/>
     <mkdir dir="${artifacts.temp.dir}"/>
     <property name="artifact.temp.output.TetrisV3" value="${artifacts.temp.dir}/TetrisV3.jar"/>
-    <property name="temp.jar.path.TetrisV3.jar" value="${artifacts.temp.dir}/1/TetrisV3.jar"/>
-    <mkdir dir="${artifacts.temp.dir}/1"/>
     <taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant" classpath="${jdk.home.11}/lib/ant-javafx.jar"/>
   </target>
   
@@ -178,53 +175,4 @@
       <exclude name="TetrisV3.jar"/>
     </fx:fileset>
     <fx:fileset id="all_TetrisV3" dir="${artifact.temp.output.TetrisV3}" includes="**/*.jar"/>
-    <fx:application id="TetrisV3_id" name="Tetris" mainClass="sample.Main" version="1.0"/>
-    <fx:jar destfile="${artifact.temp.output.TetrisV3}/TetrisV3.jar">
-      <fx:application refid="TetrisV3_id"/>
-      <fileset dir="${artifact.temp.output.TetrisV3}" excludes="**/*.jar"/>
-      <fx:resources>
-        <fx:fileset refid="all_but_TetrisV3"/>
-      </fx:resources>
-      <manifest>
-        <attribute name="Implementation-Title" value="Tetris"/>
-        <attribute name="Implementation-Version" value="1.0"/>
-        <attribute name="Implementation-Vendor" value=""/>
-      </manifest>
-    </fx:jar>
-    <fx:deploy width="600" height="400" updatemode="background" outdir="${artifact.temp.output.TetrisV3}/deploy" outfile="TetrisV3">
-      <fx:application refid="TetrisV3_id"/>
-      <fx:info title="Tetris"/>
-      <fx:resources>
-        <fx:fileset refid="all_TetrisV3"/>
-      </fx:resources>
-    </fx:deploy>
-    <copy todir="${artifact.output.tetris}">
-      <fileset dir="${artifact.temp.output.TetrisV3}/deploy"/>
-    </copy>
-    <delete includeemptydirs="true">
-      <fileset dir="${artifact.temp.output.TetrisV3}"/>
-    </delete>
-  </target>
-  
-  <target name="artifact.tetrisv3:jar" depends="init.artifacts, compile.module.tetrisv3" description="Build &#39;TetrisV3:jar&#39; artifact">
-    <property name="artifact.temp.output.tetrisv3:jar" value="${artifacts.temp.dir}/TetrisV3_jar"/>
-    <mkdir dir="${artifact.temp.output.tetrisv3:jar}"/>
-    <jar destfile="${temp.jar.path.TetrisV3.jar}" duplicate="preserve" filesetmanifest="mergewithoutmain">
-      <zipfileset dir="${tetrisv3.output.dir}"/>
-      <zipfileset src="${path.variable.maven_repository}/org/jetbrains/annotations/17.0.0/annotations-17.0.0.jar"/>
-    </jar>
-    <copy file="${temp.jar.path.TetrisV3.jar}" tofile="${artifact.temp.output.tetrisv3:jar}/TetrisV3.jar"/>
-  </target>
-  
-  <target name="build.all.artifacts" depends="artifact.tetris, artifact.tetrisv3:jar" description="Build all artifacts">
-    <mkdir dir="${artifact.output.tetrisv3:jar}"/>
-    <copy todir="${artifact.output.tetrisv3:jar}">
-      <fileset dir="${artifact.temp.output.tetrisv3:jar}"/>
-    </copy>
-    
-    <!-- Delete temporary files -->
-    <delete dir="${artifacts.temp.dir}"/>
-  </target>
-  
-  <target name="all" depends="build.modules, build.all.artifacts" description="build all"/>
-</project>
+    <fx:application id="TetrisV3_id" name="Tetris" mainClass="

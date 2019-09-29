@@ -25,8 +25,7 @@ import java.util.function.Consumer;
 
 import static javafx.scene.media.MediaPlayer.INDEFINITE;
 import static javafx.scene.paint.Color.*;
-import static sample.SettingScene.IS_MUSIC;
-import static sample.SettingScene.IS_SOUND;
+import static sample.SettingScene.*;
 
 public class PlayScene implements Initializable {
 
@@ -107,56 +106,49 @@ public class PlayScene implements Initializable {
         gc = canvas.getGraphicsContext2D();
         centerPane.getChildren().addAll(canvas);
 
-        //Canvas droppedCanvas = new Canvas(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
-        //droppedGC = droppedCanvas.getGraphicsContext2D();
-        //centerPane.getChildren().addAll(droppedCanvas);
-
         Canvas nextBlockCanvas = new Canvas(4 * SIZE, 4 * SIZE);
         gcNextBlock = nextBlockCanvas.getGraphicsContext2D();
         nextBlockPane.getChildren().addAll(nextBlockCanvas);
         gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
 
-        /*TODO
-         *  change colours/allow user to do this
-         * because somebody is crying about purple...*/
         //L shape
-        original.add(new Tetromino(BLUE,
+        original.add(new Tetromino(LBlockColour,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.RIGHT),
                 new Block(1, Direction.LEFT),
                 new Block(1, Direction.DOWN, Direction.LEFT)));
         //O shape
-        original.add(new Tetromino(YELLOW,
+        original.add(new Tetromino(OBlockColour,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.RIGHT),
                 new Block(1, Direction.RIGHT, Direction.DOWN),
                 new Block(1, Direction.DOWN)));
         //I shape
-        original.add(new Tetromino(INDIGO,
+        original.add(new Tetromino(IBlockColour,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.LEFT),
                 new Block(1, Direction.RIGHT),
                 new Block(2, Direction.RIGHT)));
         //J shape
-        original.add(new Tetromino(VIOLET,
+        original.add(new Tetromino(JBlockColour,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.LEFT),
                 new Block(1, Direction.RIGHT),
                 new Block(1, Direction.DOWN, Direction.RIGHT)));
         //T shape
-        original.add(new Tetromino(ORANGE,
+        original.add(new Tetromino(TBlockColour,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.RIGHT),
                 new Block(1, Direction.LEFT),
                 new Block(1, Direction.DOWN)));
         //Z shape
-        original.add(new Tetromino(RED,
+        original.add(new Tetromino(ZBlockColour,
                 new Block(0, Direction.DOWN),
                 new Block(1, Direction.DOWN),
                 new Block(1, Direction.RIGHT, Direction.DOWN),
                 new Block(1, Direction.LEFT)));
         //S shape
-        original.add(new Tetromino(GREEN,
+        original.add(new Tetromino(SBlockColour,
                 new Block(0, Direction.UP),
                 new Block(1, Direction.DOWN),
                 new Block(1, Direction.LEFT, Direction.DOWN),
@@ -568,14 +560,7 @@ public class PlayScene implements Initializable {
     private void showDroppedTetromino(){
         /*TODO
          * showing where tetromino will fall if pressed space*/
-        /*droppedGC.clearRect(0,0,BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
-        Tetromino dropped = new Tetromino(selected.getColor(), selected.blocks.stream()
-                .map(Block::copy).toArray(Block[]::new));
-        dropped.setColor(droppedGC);
-        dropped.move(selected.x, selected.y);
-        for(int i = 0; i < 10; i++){
-            dropped.move(Direction.DOWN);
-        }*/
+
     }
 
     private void pauseMenu() {
@@ -665,10 +650,10 @@ public class PlayScene implements Initializable {
         highScores.add(new Pair<>("Tim", 40000));
         highScores.add(new Pair<>("Dwayne", 300));
         highScores.add(new Pair<>("Mark", 50));
-        highScores.add(new Pair<>("Mark", 50));
+        highScores.add(new Pair<>("Chris", 25));
 
         //sorting list by comparing values
-        highScores.sort((c1, c2)-> c1.getValue() > c2.getValue()? -1: 1);
+        highScores.sort((c1, c2)-> c2.getValue().compareTo(c1.getValue()));
 
         //list of scores converted to text
         List<Text> scores = new ArrayList<>();

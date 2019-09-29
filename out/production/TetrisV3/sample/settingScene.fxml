@@ -6,7 +6,6 @@
 <FlowPane xmlns:fx="http://javafx.com/fxml" fx:controller="sample.SettingScene" orientation="VERTICAL"
           alignment="CENTER" vgap="10" prefHeight="275.0" prefWidth="300.0">
     <CheckBox fx:id="musicButton" text="Music" prefWidth="100" onAction="#handleMusicButton"/>
-    <CheckBox fx:id="soundButton" text="Sound (WIP)" prefWidth="100"/>
+    <CheckBox fx:id="soundButton" text="Sound" prefWidth="100" onAction="#handleSoundButton"/>
     <Button fx:id="returnButton" text="Return" prefWidth="100" onAction="#handleReturnButton"/>
-
 </FlowPane>

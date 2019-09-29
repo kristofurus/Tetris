@@ -9,24 +9,39 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import static javafx.scene.media.MediaPlayer.INDEFINITE;
-
 
 public class SettingScene implements Initializable {
 
+    //FXML variables
     @FXML
     CheckBox musicButton;
     @FXML
     CheckBox soundButton;
     @FXML
     Button returnButton;
+
+    /*TODO
+     * download options from file
+     * add possibility of changing block colour*/
+
+    //sound and music variables
+    static boolean IS_MUSIC = false;
+    static boolean IS_SOUND = false;
+
+    //tetromino colours variables
+    static Color IBlockColour;
+    static Color JBlockColour;
+    static Color LBlockColour;
+    static Color SBlockColour;
+    static Color ZBlockColour;
+    static Color OBlockColour;
+    static Color TBlockColour;
 
     @FXML
     private void handleReturnButton(ActionEvent event) throws Exception {
@@ -37,23 +52,14 @@ public class SettingScene implements Initializable {
         appStage.show();
     }
 
-    //TODO
-    // error with stopping music when stopped it plays for few more seconds
-    // when leaving settings music stops after about 5 sec
-    private MediaPlayer mediaPlayer;
-
     @FXML
     private void handleMusicButton() {
-        mediaPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/Tetris.mp3").toString()));
-        if (musicButton.isSelected()) {
-            mediaPlayer.setOnReady(() -> {
-                mediaPlayer.setAutoPlay(true);
-                mediaPlayer.setCycleCount(INDEFINITE);
-            });
-        } else {
-            mediaPlayer.stop();
-            mediaPlayer.setAutoPlay(false);
-        }
+        IS_MUSIC = musicButton.isSelected();
+    }
+
+    @FXML
+    private void handleSoundButton(){
+        IS_SOUND = soundButton.isSelected();
     }
 
     @Override

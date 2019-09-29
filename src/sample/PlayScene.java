@@ -4,17 +4,19 @@ import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
+import javafx.util.Pair;
 
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -23,6 +25,8 @@ import java.util.function.Consumer;
 
 import static javafx.scene.media.MediaPlayer.INDEFINITE;
 import static javafx.scene.paint.Color.*;
+import static sample.SettingScene.IS_MUSIC;
+import static sample.SettingScene.IS_SOUND;
 
 public class PlayScene implements Initializable {
 
@@ -87,24 +91,31 @@ public class PlayScene implements Initializable {
     //settings variables
 
     //music variables
-    private boolean isMusic = false;
+    private boolean isMusic = IS_MUSIC;
     private MediaPlayer mediaPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/Tetris.mp3").toString()));
 
     //sound variables
-    private boolean isSound = false;
+    private boolean isSound = IS_SOUND;
 
     /**method: createContent
      * prepares board seen from user and shapes that will be generated
      * it also starts timer that will measure time and update board*/
     private void createContent() {
         centerPane.setPrefSize(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
+
         Canvas canvas = new Canvas(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
         gc = canvas.getGraphicsContext2D();
         centerPane.getChildren().addAll(canvas);
+
+        //Canvas droppedCanvas = new Canvas(BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
+        //droppedGC = droppedCanvas.getGraphicsContext2D();
+        //centerPane.getChildren().addAll(droppedCanvas);
+
         Canvas nextBlockCanvas = new Canvas(4 * SIZE, 4 * SIZE);
         gcNextBlock = nextBlockCanvas.getGraphicsContext2D();
         nextBlockPane.getChildren().addAll(nextBlockCanvas);
         gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
+
         /*TODO
          *  change colours/allow user to do this
          * because somebody is crying about purple...*/
@@ -188,6 +199,7 @@ public class PlayScene implements Initializable {
         SimpleDateFormat df = new SimpleDateFormat("mm:ss");
         String timeText = df.format(d);
         timeLabel.setText(timeText);
+        showDroppedTetromino();
     }
 
     /**method: makeMove
@@ -509,6 +521,10 @@ public class PlayScene implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        if (isMusic) {
+            mediaPlayer.setAutoPlay(true);
+            mediaPlayer.setCycleCount(INDEFINITE);
+        }
         startGame();
     }
 
@@ -535,7 +551,7 @@ public class PlayScene implements Initializable {
                     break;
                 case SPACE:
                     //this one is ok but does not allow player to instantly drop a tetromino
-                    while((int)selected.x != BOARD_WIDTH/2 && selected.y != 0){
+                    while(selected.y != 0){
                         makeMove(p -> p.move(Direction.DOWN), p -> p.move(Direction.UP), true);
                     }
                     score++;
@@ -549,75 +565,137 @@ public class PlayScene implements Initializable {
         });
     }
 
-    private void pauseMenu() {
+    private void showDroppedTetromino(){
         /*TODO
-         * add pause where user can choose:
-         * go back to menu (WIP)
-         * go to settings (WIP) <- changed into turn on/off music/sound
-         * go back to the game (DONE)
-         * go to help (DONE)*/
-        isPaused = true;
-        Dialog<ButtonType> pauseDialog = new Dialog<>();
-        //buttons
-        pauseDialog.setTitle("Pause");
-        pauseDialog.setHeaderText("GAME PAUSED");
-        ButtonType buttonTypeReturn = new ButtonType("Return");
-        ButtonType buttonTypeHelp = new ButtonType("Help");
-        //music button
-        ButtonType buttonTypeMusic;
-        if(isMusic) {
-            buttonTypeMusic = new ButtonType("Music on");
-        } else {
-            buttonTypeMusic = new ButtonType("Music off");
-        }
-        //sound button
-        ButtonType buttonTypeSound;
-        if(isSound) {
-            buttonTypeSound = new ButtonType("Sound on");
-        } else {
-            buttonTypeSound = new ButtonType("Sound off");
-        }
-        ButtonType buttonTypeExit = new ButtonType("Exit");
-
-        pauseDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn, buttonTypeHelp, buttonTypeMusic, buttonTypeSound, buttonTypeExit);
-
-        //preparing results for pressing correct button
-        Optional<ButtonType> result = pauseDialog.showAndWait();
-        if(result.isPresent()) {
-            if (result.get().equals(buttonTypeReturn)) {
-                isPaused = false;
-            } else if (result.get().equals(buttonTypeHelp)) {
-               helpMenu();
-            } else if (result.get().equals(buttonTypeExit)) {
-                System.out.println("here you exit but for now you come back to the game");
-                isPaused = false;
-            } else if (result.get().equals(buttonTypeMusic)){
-                isMusic = !isMusic;
-                if (isMusic) {
-                        mediaPlayer.setAutoPlay(true);
-                        mediaPlayer.setCycleCount(INDEFINITE);
-                } else {
-                    mediaPlayer.stop();
-                    mediaPlayer.setAutoPlay(false);
-                }
-                pauseMenu();
-            } else if (result.get().equals(buttonTypeSound)) {
-                isSound = !isSound;
-                pauseMenu();
-            }
-        }
+         * showing where tetromino will fall if pressed space*/
+        /*droppedGC.clearRect(0,0,BOARD_WIDTH * SIZE, BOARD_HEIGHT * SIZE);
+        Tetromino dropped = new Tetromino(selected.getColor(), selected.blocks.stream()
+                .map(Block::copy).toArray(Block[]::new));
+        dropped.setColor(droppedGC);
+        dropped.move(selected.x, selected.y);
+        for(int i = 0; i < 10; i++){
+            dropped.move(Direction.DOWN);
+        }*/
     }
 
-    private void helpMenu(){
-        Dialog<ButtonType> helpDialog = new Dialog<>();
-        helpDialog.setTitle("Help");
-        helpDialog.setHeaderText("w/up - rotate\na/left - move left\n" +
+    private void pauseMenu() {
+
+        //pausing game
+        isPaused = true;
+
+        //size variables
+        final int DIALOG_WIDTH = 350;
+        final int DIALOG_HEIGHT = 200;
+
+        //creating dialog
+        Dialog<Boolean> pauseDialog = new Dialog<>();
+        pauseDialog.setTitle("Pause");
+        pauseDialog.setHeaderText("GAME PAUSED");
+
+        //declaring panes
+        FlowPane helpPane = new FlowPane();
+        BorderPane pausePane = new BorderPane();
+        HBox settingsPane = new HBox();
+        HBox pauseButtonsPane = new HBox();
+        VBox highScorePane = new VBox();
+
+        //Pause buttons content
+        Button returnButton = new Button("Return");
+        Button helpButton = new Button("Help");
+        Button highScoreButton = new Button("HighScore");
+        Button settingsButton = new Button("Settings");
+        Button exitButton = new Button("Exit");
+
+        //Pause buttons onAction
+        returnButton.setOnAction(e->{
+            pauseDialog.setResult(true);
+            pauseDialog.close();
+            isPaused = false;
+        });
+        helpButton.setOnAction(e-> pausePane.setCenter(helpPane));
+        settingsButton.setOnAction(e-> pausePane.setCenter(settingsPane));
+        exitButton.setOnAction(e->Platform.exit());
+        highScoreButton.setOnAction(e-> pausePane.setCenter(highScorePane));
+
+        //pause buttons pane
+        pauseButtonsPane.setAlignment(Pos.CENTER);
+        pauseButtonsPane.setSpacing(10);
+        pauseButtonsPane.getChildren().addAll(returnButton, helpButton, highScoreButton, settingsButton, exitButton);
+
+        //Settings content
+        CheckBox musicCheckBox = new CheckBox("Music");
+        musicCheckBox.setSelected(isMusic);
+        musicCheckBox.setOnAction(e->{
+            isMusic = musicCheckBox.isSelected();
+            if (isMusic) {
+                mediaPlayer.setAutoPlay(true);
+                mediaPlayer.setCycleCount(INDEFINITE);
+            } else {
+                mediaPlayer.stop();
+                mediaPlayer.setAutoPlay(false);
+            }
+        });
+        CheckBox soundCheckBox = new CheckBox("Sound");
+        soundCheckBox.setSelected(isSound);
+        soundCheckBox.setOnAction(e->isSound = !isSound);
+
+        //setting pane
+        settingsPane.setAlignment(Pos.CENTER);
+        settingsPane.setSpacing(10);
+        settingsPane.getChildren().addAll(musicCheckBox, soundCheckBox);
+
+        //help content
+        Text helpText = new Text("w/up - rotate\na/left - move left\n" +
                 "d/right - move right\ns/down - move down");
-        ButtonType buttonTypeReturn = new ButtonType("Return");
-        helpDialog.getDialogPane().getButtonTypes().setAll(buttonTypeReturn);
-        Optional<ButtonType> helpResult = helpDialog.showAndWait();
-        if (helpResult.isPresent()){
-            pauseMenu();
+        helpText.setTextAlignment(TextAlignment.CENTER);
+
+        //help pane
+        helpPane.setAlignment(Pos.CENTER);
+        helpPane.setOrientation(Orientation.VERTICAL);
+        helpPane.setVgap(10);
+        helpPane.getChildren().addAll(helpText);
+
+        //highScoreContent
+        //size variables
+        final int TEXT_LENGTH = 20;
+
+        //list of high scores
+        List<Pair<String, Integer>> highScores = new ArrayList<>();
+        highScores.add(new Pair<>("John", 20000));
+        highScores.add(new Pair<>("Tim", 40000));
+        highScores.add(new Pair<>("Dwayne", 300));
+        highScores.add(new Pair<>("Mark", 50));
+        highScores.add(new Pair<>("Mark", 50));
+
+        //sorting list by comparing values
+        highScores.sort((c1, c2)-> c1.getValue() > c2.getValue()? -1: 1);
+
+        //list of scores converted to text
+        List<Text> scores = new ArrayList<>();
+
+        //converting scores to text
+        for (Pair<String, Integer> highScore : highScores) {
+            StringBuilder tmp;
+            tmp = new StringBuilder(highScore.getKey());
+            tmp.append("_".repeat(Math.max(0, TEXT_LENGTH - highScore.getKey().length() - highScore.getValue().toString().length())));
+            tmp.append(highScore.getValue().toString());
+            scores.add(new Text(tmp.toString()));
         }
+
+        //highScore pane
+        highScorePane.setAlignment(Pos.CENTER);
+        highScorePane.setSpacing(10);
+        highScorePane.getChildren().addAll(scores);
+
+        //pause dialog pane
+        pausePane.setPrefSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+        pausePane.setCenter(settingsPane);
+        pausePane.setBottom(pauseButtonsPane);
+
+        //setting pausePane as a pause dialog content
+        pauseDialog.getDialogPane().setContent(pausePane);
+
+        //showing dialog pane
+        pauseDialog.show();
     }
 }

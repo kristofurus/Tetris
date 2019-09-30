@@ -50,24 +50,24 @@ public class SettingScene implements Initializable {
      * download options from file*/
 
     //sound and music variables
-    static boolean IS_MUSIC = false;
-    static boolean IS_SOUND = false;
+    static boolean IS_MUSIC;
+    static boolean IS_SOUND;
 
     //tetromino colours variables
     @FXML
-    static Color IBlockColour = Color.INDIGO;
+    static Color IBlockColour;
     @FXML
-    static Color JBlockColour = Color.VIOLET;
+    static Color JBlockColour;
     @FXML
-    static Color LBlockColour = Color.BLUE;
+    static Color LBlockColour;
     @FXML
-    static Color SBlockColour = Color.GREEN;
+    static Color SBlockColour;
     @FXML
-    static Color ZBlockColour = Color.RED;
+    static Color ZBlockColour;
     @FXML
-    static Color OBlockColour = Color.YELLOW;
+    static Color OBlockColour;
     @FXML
-    static Color TBlockColour = Color.ORANGE;
+    static Color TBlockColour;
 
     @FXML
     private void handleReturnButton(ActionEvent event) throws Exception {
@@ -139,6 +139,7 @@ public class SettingScene implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
+        musicButton.setSelected(IS_MUSIC);
+        soundButton.setSelected(IS_SOUND);
     }
 }

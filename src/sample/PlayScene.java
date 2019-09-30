@@ -27,6 +27,7 @@ import java.util.function.Consumer;
 import static javafx.scene.media.MediaPlayer.INDEFINITE;
 import static javafx.scene.paint.Color.BLACK;
 import static javafx.scene.paint.Color.LIGHTGRAY;
+import static sample.Main.save;
 import static sample.SettingScene.*;
 
 public class PlayScene implements Initializable {
@@ -87,14 +88,7 @@ public class PlayScene implements Initializable {
     private double combo = 1;
 
     //highScore variables
-    private List<Pair<String, Integer>> highScores = new ArrayList<>();
-    {
-        highScores.add(new Pair<>("John", 200));
-        highScores.add(new Pair<>("Tim", 400));
-        highScores.add(new Pair<>("Dwayne", 300));
-        highScores.add(new Pair<>("Mark", 50));
-        highScores.add(new Pair<>("Chris", 25));
-    }
+    static List<Pair<String, Integer>> highScores = new ArrayList<>();
 
     //pause dialog variables
     private boolean isPaused = false;
@@ -300,10 +294,28 @@ public class PlayScene implements Initializable {
             }
             rows.add(y);
         }
-        /*TODO
-         * add perfect clear bonus for clearing whole board?*/
+
+        //checking if board was cleared
+        boolean isClear = true;
+        for(int x = 0; x < BOARD_WIDTH; x++){
+            for(int y = 0; y < BOARD_HEIGHT; y++){
+                if(board[x][y] != 0){
+                    isClear = false;
+                    break;
+                }
+            }
+        }
+        if(isClear){
+            if(isSound){
+                MediaPlayer clearPlayer = new MediaPlayer(new Media(getClass().getResource("../resources/clear.wav").toString()));
+                clearPlayer.play();
+            }
+            score += 50;
+        }
+
+        //adding points for removing rows
         int level = 1;
-        if(rows.size() > 0 && isSound){
+        if(rows.size() > 0 && isSound && !isClear){
             MediaPlayer linePlayer = new MediaPlayer(new Media(getClass().getResource("../resources/line.wav").toString()));
             linePlayer.play();
         }
@@ -333,7 +345,7 @@ public class PlayScene implements Initializable {
                 }
                 break;
             case 4:
-                score += 800* level;
+                score += 800*level;
                 if (combo < 2) {
                     combo += 0.1;
                 } else {
@@ -405,7 +417,6 @@ public class PlayScene implements Initializable {
         //creating dialog
         Dialog<Boolean> gameOverDialog = new Dialog<>();
         gameOverDialog.setTitle("GameOver");
-        //gameOverDialog.setHeaderText("GAME OVER");
 
         //declaring panes
         BorderPane gameOverPane = new BorderPane();
@@ -453,10 +464,6 @@ public class PlayScene implements Initializable {
         gameOverMiddlePane.setSpacing(5);
         gameOverMiddlePane.getChildren().addAll(highScoreText, gameOverInformation, nameAsk, nameField);
 
-        /*TODO
-         * add checking if score is greater than last from high score list and if it's true
-         * ask player for the name and then replace it*/
-
         //end game buttons onAction
         playAgainButton.setOnAction(e->{
             //adding new high score
@@ -483,6 +490,7 @@ public class PlayScene implements Initializable {
             highScores.sort((c1, c2)-> c2.getValue().compareTo(c1.getValue()));
 
             //exiting game
+            save();
             Platform.exit();
         });
 
@@ -684,7 +692,7 @@ public class PlayScene implements Initializable {
         });
         helpButton.setOnAction(e-> pausePane.setCenter(helpPane));
         settingsButton.setOnAction(e-> pausePane.setCenter(settingsPane));
-        exitButton.setOnAction(e->Platform.exit());
+        exitButton.setOnAction(e->{save(); Platform.exit();});
         highScoreButton.setOnAction(e-> pausePane.setCenter(highScorePane));
 
         //pause buttons pane

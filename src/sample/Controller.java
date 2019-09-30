@@ -65,6 +65,7 @@ public class Controller implements Initializable {
 
     @FXML
     private void handleExitButton() {
+        Main.save();
         Platform.exit();
         System.exit(0);
     }

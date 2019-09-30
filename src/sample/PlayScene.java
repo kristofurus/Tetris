@@ -25,7 +25,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static javafx.scene.media.MediaPlayer.INDEFINITE;
-import static javafx.scene.paint.Color.*;
+import static javafx.scene.paint.Color.BLACK;
+import static javafx.scene.paint.Color.LIGHTGRAY;
 import static sample.SettingScene.*;
 
 public class PlayScene implements Initializable {
@@ -88,8 +89,8 @@ public class PlayScene implements Initializable {
     //highScore variables
     private List<Pair<String, Integer>> highScores = new ArrayList<>();
     {
-        highScores.add(new Pair<>("John", 20000));
-        highScores.add(new Pair<>("Tim", 40000));
+        highScores.add(new Pair<>("John", 200));
+        highScores.add(new Pair<>("Tim", 400));
         highScores.add(new Pair<>("Dwayne", 300));
         highScores.add(new Pair<>("Mark", 50));
         highScores.add(new Pair<>("Chris", 25));
@@ -119,7 +120,7 @@ public class PlayScene implements Initializable {
 
         Canvas nextBlockCanvas = new Canvas(4 * SIZE, 4 * SIZE);
         gcNextBlock = nextBlockCanvas.getGraphicsContext2D();
-        nextBlockPane.getChildren().addAll(nextBlockCanvas);
+        nextBlockPane.getChildren().setAll(nextBlockCanvas);
         gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
 
         //L shape
@@ -423,9 +424,26 @@ public class PlayScene implements Initializable {
         //game over middle pane
         Text gameOverInformation = new Text();
         Text nameAsk = new Text("Enter your name: ");
+        Text highScoreText = new Text("HighScore");
+        highScoreText.setVisible(false);
         TextField nameField = new TextField();
 
+        //setting name field and limits name length to 10 letters
+        nameField.setMaxWidth(100);
+        final int TEXT_LIMIT = 10;
+        nameField.lengthProperty().addListener((observableValue, oldValue, newValue) -> {
+            if (newValue.intValue() > oldValue.intValue()) {
+                if (nameField.getText().length() >= TEXT_LIMIT) {
+                    nameField.setText(nameField.getText().substring(0, TEXT_LIMIT));
+                }
+            }
+        });
+
         //preparing game information
+        highScores.sort((c1, c2)-> c2.getValue().compareTo(c1.getValue()));
+        if(score > highScores.get(0).getValue()){
+            highScoreText.setVisible(true);
+        }
         Date d = new Date((long) milliseconds);
         SimpleDateFormat df = new SimpleDateFormat("mm:ss");
         gameOverInformation.setText("GAME OVER\n"+ "score: " + score + "\ntime: " + df.format(d));
@@ -433,7 +451,7 @@ public class PlayScene implements Initializable {
         //game over middle pane
         gameOverMiddlePane.setAlignment(Pos.CENTER);
         gameOverMiddlePane.setSpacing(5);
-        gameOverMiddlePane.getChildren().addAll(gameOverInformation, nameAsk, nameField);
+        gameOverMiddlePane.getChildren().addAll(highScoreText, gameOverInformation, nameAsk, nameField);
 
         /*TODO
          * add checking if score is greater than last from high score list and if it's true
@@ -441,12 +459,32 @@ public class PlayScene implements Initializable {
 
         //end game buttons onAction
         playAgainButton.setOnAction(e->{
+            //adding new high score
+            if(score > highScores.get(4).getValue() && nameField.getText().trim().length() > 0){
+                highScores.set(4, new Pair<>(nameField.getText(), score));
+            } else if(score > highScores.get(4).getValue() && nameField.getText().trim().length() == 0){
+                highScores.set(4, new Pair<>("Unknown", score));
+            }
+            highScores.sort((c1, c2)-> c2.getValue().compareTo(c1.getValue()));
+
+            //starting new game
             startGame();
             isPaused = false;
             gameOverDialog.setResult(true);
             gameOverDialog.close();
         });
-        exitButton.setOnAction(e->Platform.exit());
+        exitButton.setOnAction(e->{
+            //adding new high score
+            if(score > highScores.get(4).getValue() && nameField.getText().trim().length() > 0){
+                highScores.set(4, new Pair<>(nameField.getText(), score));
+            } else if(score > highScores.get(4).getValue() && nameField.getText().trim().length() == 0){
+                highScores.set(4, new Pair<>("Unknown", score));
+            }
+            highScores.sort((c1, c2)-> c2.getValue().compareTo(c1.getValue()));
+
+            //exiting game
+            Platform.exit();
+        });
 
         //game over pane
         gameOverPane.setPrefSize(DIALOG_WIDTH, DIALOG_HEIGHT);
@@ -545,6 +583,7 @@ public class PlayScene implements Initializable {
 
     private void loadBoards(){
         Rectangle[][] rectangles = new Rectangle[10][20];
+        centerPane.getChildren().setAll();
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 20; j++) {
                 rectangles[i][j] = new Rectangle(SIZE * i, SIZE * j, SIZE, SIZE);
@@ -604,7 +643,6 @@ public class PlayScene implements Initializable {
     private void showDroppedTetromino(){
         /*TODO
          * showing where tetromino will fall if pressed space*/
-
     }
 
     private void pauseMenu() {

@@ -30,37 +30,43 @@ public class SettingScene implements Initializable {
     Button defaultButton;
 
     @FXML
-    ToggleButton IBlock;
+    RadioButton IBlock;
     @FXML
-    ToggleButton JBlock;
+    RadioButton JBlock;
     @FXML
-    ToggleButton LBlock;
+    RadioButton LBlock;
     @FXML
-    ToggleButton SBlock;
+    RadioButton SBlock;
     @FXML
-    ToggleButton ZBlock;
+    RadioButton ZBlock;
     @FXML
-    ToggleButton OBlock;
+    RadioButton OBlock;
     @FXML
-    ToggleButton TBlock;
+    RadioButton TBlock;
     @FXML
     ToggleGroup blockGroup;
 
     /*TODO
-     * download options from file
-     * add possibility of changing block colour*/
+     * download options from file*/
 
     //sound and music variables
     static boolean IS_MUSIC = false;
     static boolean IS_SOUND = false;
 
     //tetromino colours variables
+    @FXML
     static Color IBlockColour = Color.INDIGO;
+    @FXML
     static Color JBlockColour = Color.VIOLET;
+    @FXML
     static Color LBlockColour = Color.BLUE;
+    @FXML
     static Color SBlockColour = Color.GREEN;
+    @FXML
     static Color ZBlockColour = Color.RED;
+    @FXML
     static Color OBlockColour = Color.YELLOW;
+    @FXML
     static Color TBlockColour = Color.ORANGE;
 
     @FXML
@@ -98,6 +104,25 @@ public class SettingScene implements Initializable {
             TBlockColour = colorPicker.getValue();
         } else if(OBlock.equals(blockGroup.getSelectedToggle())){
             OBlockColour = colorPicker.getValue();
+        }
+    }
+
+    @FXML
+    private void changeColor(){
+        if (IBlock.equals(blockGroup.getSelectedToggle())) {
+            colorPicker.setValue(IBlockColour);
+        } else if(LBlock.equals(blockGroup.getSelectedToggle())){
+            colorPicker.setValue(LBlockColour);
+        } else if(JBlock.equals(blockGroup.getSelectedToggle())){
+            colorPicker.setValue(JBlockColour);
+        } else if(ZBlock.equals(blockGroup.getSelectedToggle())){
+            colorPicker.setValue(ZBlockColour);
+        } else if(SBlock.equals(blockGroup.getSelectedToggle())){
+            colorPicker.setValue(SBlockColour);
+        } else if(TBlock.equals(blockGroup.getSelectedToggle())){
+            colorPicker.setValue(TBlockColour);
+        } else if(OBlock.equals(blockGroup.getSelectedToggle())){
+            colorPicker.setValue(OBlockColour);
         }
     }
 

@@ -12,6 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -83,6 +84,16 @@ public class PlayScene implements Initializable {
     //score variables
     private int score = 0;
     private double combo = 1;
+
+    //highScore variables
+    private List<Pair<String, Integer>> highScores = new ArrayList<>();
+    {
+        highScores.add(new Pair<>("John", 20000));
+        highScores.add(new Pair<>("Tim", 40000));
+        highScores.add(new Pair<>("Dwayne", 300));
+        highScores.add(new Pair<>("Mark", 50));
+        highScores.add(new Pair<>("Chris", 25));
+    }
 
     //pause dialog variables
     private boolean isPaused = false;
@@ -383,35 +394,68 @@ public class PlayScene implements Initializable {
     }
 
     private void gameOver(){
-        /*TODO
-         * make end gameOver menu with showing final score and time (Done)
-         * also make it possible to choose if user want to return(WIP) or play again(Done)*/
         //pausing game
         isPaused = true;
+
+        //size variables
+        final int DIALOG_WIDTH = 400;
+        final int DIALOG_HEIGHT = 200;
+
         //creating dialog
-        Dialog<ButtonType> gameOverDialog = new Dialog<>();
+        Dialog<Boolean> gameOverDialog = new Dialog<>();
         gameOverDialog.setTitle("GameOver");
-        gameOverDialog.setHeaderText("GAME OVER");
-        //preparing time
+        //gameOverDialog.setHeaderText("GAME OVER");
+
+        //declaring panes
+        BorderPane gameOverPane = new BorderPane();
+        HBox gameOverButtonsPane = new HBox();
+        VBox gameOverMiddlePane = new VBox();
+
+        //game over buttons pane content
+        Button playAgainButton = new Button("PlayAgain");
+        Button exitButton = new Button("Exit");
+
+        //game over buttons pane
+        gameOverButtonsPane.setAlignment(Pos.CENTER);
+        gameOverButtonsPane.setSpacing(10);
+        gameOverButtonsPane.getChildren().addAll(playAgainButton, exitButton);
+
+        //game over middle pane
+        Text gameOverInformation = new Text();
+        Text nameAsk = new Text("Enter your name: ");
+        TextField nameField = new TextField();
+
+        //preparing game information
         Date d = new Date((long) milliseconds);
         SimpleDateFormat df = new SimpleDateFormat("mm:ss");
-        //preparing buttons
-        ButtonType buttonTypePlayAgain = new ButtonType("PlayAgain");
-        ButtonType buttonTypeExit = new ButtonType("Exit");
-        //text
-        gameOverDialog.setHeaderText("GAME OVER\n"+ "score: " + score + "\ntime: " + df.format(d));
-        //setting buttons
-        gameOverDialog.getDialogPane().getButtonTypes().setAll(buttonTypePlayAgain, buttonTypeExit);
+        gameOverInformation.setText("GAME OVER\n"+ "score: " + score + "\ntime: " + df.format(d));
 
-        gameOverDialog.setOnCloseRequest(e -> {
-            if (gameOverDialog.getResult().equals(buttonTypePlayAgain)) {
-                gcNextBlock.clearRect(0, 0, 4 * SIZE, 4 * SIZE);
-                startGame();
-                isPaused = false;
-            } else if (gameOverDialog.getResult().equals(buttonTypeExit)) {
-                Platform.exit();
-            }
+        //game over middle pane
+        gameOverMiddlePane.setAlignment(Pos.CENTER);
+        gameOverMiddlePane.setSpacing(5);
+        gameOverMiddlePane.getChildren().addAll(gameOverInformation, nameAsk, nameField);
+
+        /*TODO
+         * add checking if score is greater than last from high score list and if it's true
+         * ask player for the name and then replace it*/
+
+        //end game buttons onAction
+        playAgainButton.setOnAction(e->{
+            startGame();
+            isPaused = false;
+            gameOverDialog.setResult(true);
+            gameOverDialog.close();
         });
+        exitButton.setOnAction(e->Platform.exit());
+
+        //game over pane
+        gameOverPane.setPrefSize(DIALOG_WIDTH, DIALOG_HEIGHT);
+        gameOverPane.setCenter(gameOverMiddlePane);
+        gameOverPane.setBottom(gameOverButtonsPane);
+
+        //game over dialog content
+        gameOverDialog.getDialogPane().setContent(gameOverPane);
+
         //showing dialog
         gameOverDialog.show();
     }
@@ -569,7 +613,7 @@ public class PlayScene implements Initializable {
         isPaused = true;
 
         //size variables
-        final int DIALOG_WIDTH = 350;
+        final int DIALOG_WIDTH = 400;
         final int DIALOG_HEIGHT = 200;
 
         //creating dialog
@@ -580,9 +624,12 @@ public class PlayScene implements Initializable {
         //declaring panes
         FlowPane helpPane = new FlowPane();
         BorderPane pausePane = new BorderPane();
-        HBox settingsPane = new HBox();
+        VBox settingsPane = new VBox();
         HBox pauseButtonsPane = new HBox();
         VBox highScorePane = new VBox();
+        HBox upperSetting = new HBox();
+        HBox middleSettings = new HBox();
+        HBox downSettings = new HBox();
 
         //Pause buttons content
         Button returnButton = new Button("Return");
@@ -610,6 +657,21 @@ public class PlayScene implements Initializable {
         //Settings content
         CheckBox musicCheckBox = new CheckBox("Music");
         musicCheckBox.setSelected(isMusic);
+        CheckBox soundCheckBox = new CheckBox("Sound");
+        soundCheckBox.setSelected(isSound);
+        ColorPicker colorPicker = new ColorPicker();
+        Button defaultButton = new Button("Default");
+        RadioButton IBlock = new RadioButton("I block");
+        RadioButton JBlock = new RadioButton("J block");
+        RadioButton LBlock = new RadioButton("L block");
+        RadioButton SBlock = new RadioButton("S block");
+        RadioButton ZBlock = new RadioButton("Z block");
+        RadioButton OBlock = new RadioButton("O block");
+        RadioButton TBlock = new RadioButton("T block");
+        ToggleGroup blockGroup = new ToggleGroup();
+        blockGroup.getToggles().addAll(IBlock, JBlock, LBlock, SBlock, ZBlock, OBlock, TBlock);
+
+        //settings buttons onAction
         musicCheckBox.setOnAction(e->{
             isMusic = musicCheckBox.isSelected();
             if (isMusic) {
@@ -620,14 +682,53 @@ public class PlayScene implements Initializable {
                 mediaPlayer.setAutoPlay(false);
             }
         });
-        CheckBox soundCheckBox = new CheckBox("Sound");
-        soundCheckBox.setSelected(isSound);
         soundCheckBox.setOnAction(e->isSound = !isSound);
+        defaultButton.setOnAction(e->{
+            IBlockColour = Color.INDIGO;
+            JBlockColour = Color.VIOLET;
+            LBlockColour = Color.BLUE;
+            SBlockColour = Color.GREEN;
+            ZBlockColour = Color.RED;
+            OBlockColour = Color.YELLOW;
+            TBlockColour = Color.ORANGE;
+        });
+        colorPicker.setOnAction(e->{
+            if (IBlock.equals(blockGroup.getSelectedToggle())) {
+                IBlockColour = colorPicker.getValue();
+            } else if(LBlock.equals(blockGroup.getSelectedToggle())){
+                LBlockColour = colorPicker.getValue();
+            } else if(JBlock.equals(blockGroup.getSelectedToggle())){
+                JBlockColour = colorPicker.getValue();
+            } else if(ZBlock.equals(blockGroup.getSelectedToggle())){
+                ZBlockColour = colorPicker.getValue();
+            } else if(SBlock.equals(blockGroup.getSelectedToggle())){
+                SBlockColour = colorPicker.getValue();
+            } else if(TBlock.equals(blockGroup.getSelectedToggle())){
+                TBlockColour = colorPicker.getValue();
+            } else if(OBlock.equals(blockGroup.getSelectedToggle())){
+                OBlockColour = colorPicker.getValue();
+            }
+        });
+
+        //upper part of settings
+        upperSetting.setAlignment(Pos.CENTER);
+        upperSetting.setSpacing(10);
+        upperSetting.getChildren().addAll(musicCheckBox, soundCheckBox, colorPicker, defaultButton);
+
+        //middle part of settings
+        middleSettings.setAlignment(Pos.CENTER);
+        middleSettings.setSpacing(5);
+        middleSettings.getChildren().addAll(IBlock, JBlock, LBlock, SBlock);
+
+        //down part of settings
+        downSettings.setAlignment(Pos.CENTER);
+        downSettings.setSpacing(5);
+        downSettings.getChildren().addAll(ZBlock, OBlock, TBlock);
 
         //setting pane
         settingsPane.setAlignment(Pos.CENTER);
         settingsPane.setSpacing(10);
-        settingsPane.getChildren().addAll(musicCheckBox, soundCheckBox);
+        settingsPane.getChildren().addAll(upperSetting, middleSettings, downSettings);
 
         //help content
         Text helpText = new Text("w/up - rotate\na/left - move left\n" +
@@ -643,14 +744,6 @@ public class PlayScene implements Initializable {
         //highScoreContent
         //size variables
         final int TEXT_LENGTH = 20;
-
-        //list of high scores
-        List<Pair<String, Integer>> highScores = new ArrayList<>();
-        highScores.add(new Pair<>("John", 20000));
-        highScores.add(new Pair<>("Tim", 40000));
-        highScores.add(new Pair<>("Dwayne", 300));
-        highScores.add(new Pair<>("Mark", 50));
-        highScores.add(new Pair<>("Chris", 25));
 
         //sorting list by comparing values
         highScores.sort((c1, c2)-> c2.getValue().compareTo(c1.getValue()));

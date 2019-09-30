@@ -16,12 +16,12 @@
         <Button fx:id="returnButton" text="Return" prefWidth="100" onAction="#handleReturnButton"/>
     </VBox>
     <VBox spacing="5">
-        <RadioButton fx:id="IBlock" text="I block" selected="true" toggleGroup="$blockGroup"/>
-        <RadioButton fx:id="JBlock" text="J block" toggleGroup="$blockGroup"/>
-        <RadioButton fx:id="LBlock" text="L block" toggleGroup="$blockGroup"/>
-        <RadioButton fx:id="OBlock" text="O block" toggleGroup="$blockGroup"/>
-        <RadioButton fx:id="SBlock" text="S block" toggleGroup="$blockGroup"/>
-        <RadioButton fx:id="ZBlock" text="Z block" toggleGroup="$blockGroup"/>
-        <RadioButton fx:id="TBlock" text="T block" toggleGroup="$blockGroup"/>
+        <RadioButton fx:id="IBlock" text="I block" toggleGroup="$blockGroup" onAction="#changeColor"/>
+        <RadioButton fx:id="JBlock" text="J block" toggleGroup="$blockGroup" onAction="#changeColor"/>
+        <RadioButton fx:id="LBlock" text="L block" toggleGroup="$blockGroup" onAction="#changeColor"/>
+        <RadioButton fx:id="OBlock" text="O block" toggleGroup="$blockGroup" onAction="#changeColor"/>
+        <RadioButton fx:id="SBlock" text="S block" toggleGroup="$blockGroup" onAction="#changeColor"/>
+        <RadioButton fx:id="ZBlock" text="Z block" toggleGroup="$blockGroup" onAction="#changeColor"/>
+        <RadioButton fx:id="TBlock" text="T block" toggleGroup="$blockGroup" onAction="#changeColor"/>
     </VBox>
 </FlowPane>

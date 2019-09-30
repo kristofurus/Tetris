@@ -88,6 +88,7 @@ public class PlayScene implements Initializable {
     private double combo = 1;
 
     //highScore variables
+    final static int TEXT_LENGTH = 20;
     static List<Pair<String, Integer>> highScores = new ArrayList<>();
 
     //pause dialog variables
@@ -778,7 +779,7 @@ public class PlayScene implements Initializable {
 
         //help content
         Text helpText = new Text("w/up - rotate\na/left - move left\n" +
-                "d/right - move right\ns/down - move down");
+                "d/right - move right\ns/down - move down\nspace - drop");
         helpText.setTextAlignment(TextAlignment.CENTER);
 
         //help pane
@@ -788,9 +789,6 @@ public class PlayScene implements Initializable {
         helpPane.getChildren().addAll(helpText);
 
         //highScoreContent
-        //size variables
-        final int TEXT_LENGTH = 20;
-
         //sorting list by comparing values
         highScores.sort((c1, c2)-> c2.getValue().compareTo(c1.getValue()));
 

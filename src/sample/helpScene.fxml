@@ -10,5 +10,6 @@
     <Text text="a/left - move left" textAlignment="CENTER"/>
     <Text text="d/right - move right" textAlignment="CENTER"/>
     <Text text="s/down - move down" textAlignment="CENTER"/>
+    <Text text="space - drop" textAlignment="CENTER"/>
     <Button fx:id="returnButton" text="Return" prefWidth="100" onAction="#handleReturnButton"/>
 </FlowPane>

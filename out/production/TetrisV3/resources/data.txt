@@ -2,7 +2,7 @@ Steve
 4000
 Unknown
 1270
-Bon
+Bob
 756
 Dwayne
 300
@@ -10,10 +10,10 @@ John
 200
 false
 false
-#4D1A4D
-#FFCC80
-#B3B31A
-#1A3399
-#003300
+#4B0082
+#EE82EE
+#0000FF
+#008000
+#FF0000
 #FFFF00
 #FFA500
